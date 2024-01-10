@@ -1,0 +1,39 @@
+{
+  "name": "basicboilerplate",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "mocha src/test/app.spec.js -w",
+    "start": "cross-env NODE_ENV=dev node ./src/main.js",
+    "start:prod": "cross-env NODE_ENV=production node ./src/main.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mysql2": "^3.6.5"
+  },
+  "devDependencies": {
+    "cors": "^2.8.5",
+    "cross-env": "^7.0.3",
+    "crypto": "^1.0.1",
+    "dotenv": "^16.3.1",
+    "express-validator": "^7.0.1",
+    "generic-pool": "^3.9.0",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mocha": "^10.2.0",
+    "moment": "^2.29.4",
+    "morgan": "^1.10.0",
+    "nodemon": "^3.0.1",
+    "prettier": "^3.1.0",
+    "rand-token": "^1.0.1",
+    "redis": "^4.6.11",
+    "supertest": "^6.3.3",
+    "uuid": "^9.0.1",
+    "winston": "^3.11.0",
+    "winston-daily-rotate-file": "^4.7.1"
+  }
+}

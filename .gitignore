@@ -1,0 +1,6 @@
+/node_modules
+/src/config
+/logs
+.idea
+.env.production
+.env.dev
