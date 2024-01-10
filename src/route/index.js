@@ -1,14 +1,10 @@
 const { Router } = require('express');
 const  userRouter = require("./userRoute");
+const playerRouter = require("./playerRoute");
 
 const router = Router();
 
 router.use("/user", userRouter);
-
-//test용
-
-// router.get('/', (req, res, next) => {
-//   res.send('Hello World');
-// });
+router.use("/player",playerRouter);
 
 module.exports = router ;

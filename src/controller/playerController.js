@@ -11,4 +11,18 @@ module.exports = {
             resHandler.FailedResponse(res, err.stack, 500);
         }
     },
+
+    getOnePlayer : async (req,res) =>{
+        try{
+            const {playerId} = req.query;
+            const player = await playerService.getOnePlayer(playerId);
+
+            if(!player) return resHandler.FailedResponse(res,"Player were not found",400);
+
+            resHandler.SuccessResponse(res,player,200);
+        }catch (err) {
+            console.error(err);
+            resHandler.FailedResponse(res,err.stack, 500);
+        }
+    }
 };
