@@ -22,5 +22,16 @@ module.exports = {
             logger.error("getOnePlayer Service Error : ", err.stack);
             return null;
         }
+    },
+
+    getTeamPlayer : async (playerId) =>{
+        try {
+            const teamPlayer = await playerModel.getMyTeamPlayer(playerId);
+            return teamPlayer;
+        }catch (err) {
+            console.log(err);
+            logger.error("getTeamPlayer Service Error : ", err.stack);
+            return null;
+        }
     }
 }
