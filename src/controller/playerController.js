@@ -54,11 +54,10 @@ module.exports = {
         leagueSeason,
       );
 
-      if (season.length == 0)
+      if (!season || season.length == 0)
         return resHandler.FailedResponse(res, 'season were not found', 400);
 
       // 2. 시즌 기간에 해당하는 계약된 선수 조회
-
       const players = await playerService.getTeamPlayerByLeagueSeason(
         teamId,
         season,
