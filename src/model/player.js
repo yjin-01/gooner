@@ -29,8 +29,8 @@ module.exports = {
 
     try {
       const query = `
-          SELECT sb.*, po1.position_name AS position_name1, po2.position_name AS position_name2
-                , po3.position_name AS position_name3, c.contract_start_date, c.contract_end_date  
+          SELECT sb.*, po1.position_name AS main_position, po2.position_name AS sub_position1
+                , po3.position_name2 AS sub_position, c.contract_start_date, c.contract_end_date  
           FROM (
             SELECT p.* 
             FROM players p 
@@ -48,7 +48,7 @@ module.exports = {
 
       const player = await executeQuery(connection, query);
 
-      return player[0];
+      return player[0][0];
     } catch (err) {
       logger.error('getOnePlayer Model Error : ', err.stack);
       console.error('Error', err.message);
@@ -64,7 +64,8 @@ module.exports = {
     let connection;
     try {
       const query = `
-          SELECT p.*, sb.back_number, po1.position_name, po1.initial 
+          SELECT p.*, sb.back_number
+              , po1.category, po1.position_name as main_position, po1.initial
           FROM (
             SELECT *
             FROM contracts c 
@@ -95,7 +96,8 @@ module.exports = {
     let connection;
     try {
       const query = `
-        SELECT p.* , sb.back_number, po1.position_name, po1.initial
+        SELECT p.* , sb.back_number
+        , po1.category, po1.position_name as main_position, po1.initial
         FROM (
           SELECT *
           FROM contracts c 
