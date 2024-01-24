@@ -30,7 +30,7 @@ module.exports = {
     try {
       const query = `
           SELECT sb.*, po1.position_name AS main_position, po2.position_name AS sub_position1
-                , po3.position_name2 AS sub_position, c.contract_start_date, c.contract_end_date  
+                , po3.position_name AS sub_position, c.contract_start_date, c.contract_end_date  
           FROM (
             SELECT p.* 
             FROM players p 
