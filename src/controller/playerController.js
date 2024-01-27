@@ -46,18 +46,9 @@ module.exports = {
   // 시즌별 선수단 조회
   getTeamPlayerByLeagueSeason: async (req, res) => {
     try {
-      const { teamId, leagueId, leagueSeason } = req.query;
+      const { teamId, season } = req.query;
 
-      // 1. 리그별 시즌 정보 조회
-      const season = await seasonService.getSeasonByLeague(
-        leagueId,
-        leagueSeason,
-      );
-
-      if (!season || season.length == 0)
-        return resHandler.FailedResponse(res, 'season were not found', 400);
-
-      // 2. 시즌 기간에 해당하는 계약된 선수 조회
+      // 시즌 기간에 해당하는 계약된 선수 조회
       const players = await playerService.getTeamPlayerByLeagueSeason(
         teamId,
         season,

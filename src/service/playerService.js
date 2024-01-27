@@ -37,9 +37,13 @@ module.exports = {
 
   getTeamPlayerByLeagueSeason: async (teamId, season) => {
     try {
+      const leagueStartDate = season.split('-')[0] + '-07-01';
+      const leagueEndDate = season.split('-')[1] + '-06-30';
+
       const teamPlayer = await playerModel.getTeamPlayerByLeagueSeason(
         teamId,
-        season,
+        leagueStartDate,
+        leagueEndDate,
       );
       return teamPlayer;
     } catch (err) {
