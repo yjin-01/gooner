@@ -72,7 +72,7 @@ module.exports = {
     try {
       const query = `
           SELECT p.player_id, p.player_name, p.image_url, sb.back_number
-                , po1.category, po1.position_name as main_position, po1.initial
+                , po1.category, po1.initial as main_position
           FROM (
             SELECT *
             FROM contracts c 
@@ -108,7 +108,7 @@ module.exports = {
     try {
       const query = `
         SELECT p.player_id, p.player_name, p.image_url, sb.back_number
-              , po1.category, po1.position_name as main_position, po1.initial
+              , po1.category, po1.initial as main_position
         FROM (
           SELECT *
           FROM contracts c 
