@@ -1,8 +1,8 @@
-const mysql2 = require("mysql2/promise");
-const genericPool = require("generic-pool");
+const mysql2 = require('mysql2/promise');
+const genericPool = require('generic-pool');
 
-const { mysqlConfig } = require("../config/serverConfig");
-const logger = require("../util/logger");
+const { mysqlConfig } = require('../config/serverConfig');
+const logger = require('../util/logger');
 
 // 커넥션 풀 생성
 const pool = genericPool.createPool({
@@ -12,9 +12,10 @@ const pool = genericPool.createPool({
       return connection;
     } catch (err) {
       console.error(err);
-      logger.error("pool Error : ", err.stack);
+      logger.error('pool Error : ', err.stack);
     }
   },
+  enableKeepAlive: true,
   destroy: function (connection) {
     return connection.end();
   },
