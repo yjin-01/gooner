@@ -1,4 +1,5 @@
 const matchModel = require('../model/match');
+const logger = require("../util/logger");
 
 module.exports = {
   // 팀 정보 조회

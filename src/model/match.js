@@ -29,7 +29,7 @@ module.exports = {
 
       connection = await db.getConnection();
 
-      const matchList = await executeQuery(connection, query);
+      const matchList = await connection.query(query);
 
       return matchList[0];
     } catch (err) {
@@ -43,12 +43,3 @@ module.exports = {
     }
   },
 };
-
-async function executeQuery(connection, query) {
-  try {
-    const results = await connection.query(query);
-    return results;
-  } catch (error) {
-    throw error;
-  }
-}
