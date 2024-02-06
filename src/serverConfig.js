@@ -1,7 +1,8 @@
-const express = require("express");
-const cors = require("cors");
-const helmet = require("helmet");
-const route = require("./route");
+const express = require('express');
+const cors = require('cors');
+const helmet = require('helmet');
+const route = require('./route');
+const WebSocket = require('./chat');
 
 function createServerConfig(config) {
   const app = express();
@@ -19,14 +20,15 @@ function createServerConfig(config) {
   }
 
   function configureRoutes(app) {
-    app.use("/apis", route);
+    app.use('/apis', route);
     // 추가적인 라우트 모듈을 여기에 추가할 수 있습니다.
   }
 
   function start() {
-    app.listen(port, () => {
+    const socket = app.listen(port, () => {
       console.log(`Server is running on port ${port}`);
     });
+    WebSocket(socket);
   }
 
   return { start };
