@@ -1,7 +1,7 @@
 const SocketIO = require('socket.io');
 
 module.exports = (server) => {
-  const io = SocketIO(server, { path: '/socket.io' });
+  const io = SocketIO(server, { path: '/socket' });
 
   // 처음 연결 시
   io.on('connection', (socket) => {
@@ -10,6 +10,7 @@ module.exports = (server) => {
     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress; //ip 추출
     // socket.io는 연결할 때마다 id부여 => id를 통해 특정인에게 메세지 전송 가능
     console.log('새로운 클라이언트 접속', ip, socket.id, req.ip);
+    socket.broadcast.emit('connection', '연결!!!!');
 
     // 채팅방 참여하기
     socket.on('join', (room) => {
@@ -37,6 +38,7 @@ module.exports = (server) => {
 
     // 통신 확인
     socket.interval = setInterval(() => {
+      console.log('socket');
       socket.emit('news', 'Hello socket.io'); // 보낼때 브라우저에서 socket.on('news')
     }, 3000);
 
