@@ -17,7 +17,7 @@ module.exports = {
 
       connection = await db.getConnection();
 
-      const season = await executeQuery(connection, query);
+      const season = await connection.query(query);
 
       return season[0][0];
     } catch (err) {
@@ -32,11 +32,3 @@ module.exports = {
   },
 };
 
-async function executeQuery(connection, query) {
-  try {
-    const results = await connection.query(query);
-    return results;
-  } catch (error) {
-    throw error;
-  }
-}

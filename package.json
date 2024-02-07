@@ -4,7 +4,7 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "mocha src/test/app.spec.js -w",
+    "test": "jest",
     "start": "cross-env NODE_ENV=dev node ./src/main.js",
     "start:prod": "cross-env NODE_ENV=production node ./src/main.js"
   },
@@ -24,6 +24,7 @@
     "express-validator": "^7.0.1",
     "generic-pool": "^3.9.0",
     "helmet": "^7.1.0",
+    "jest": "^29.7.0",
     "jsonwebtoken": "^9.0.2",
     "mocha": "^10.2.0",
     "moment": "^2.29.4",
@@ -32,7 +33,7 @@
     "prettier": "^3.1.0",
     "rand-token": "^1.0.1",
     "redis": "^4.6.11",
-    "supertest": "^6.3.3",
+    "supertest": "^6.3.4",
     "uuid": "^9.0.1",
     "winston": "^3.11.0",
     "winston-daily-rotate-file": "^4.7.1"

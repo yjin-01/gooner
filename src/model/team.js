@@ -24,7 +24,7 @@ module.exports = {
     `;
 
       connection = await db.getConnection();
-      const team = await executeQuery(connection, query);
+      const team = await connection.query(query);
 
       return team[0][0];
     } catch (err) {
@@ -39,11 +39,3 @@ module.exports = {
   },
 };
 
-async function executeQuery(connection, query) {
-  try {
-    const results = await connection.query(query);
-    return results;
-  } catch (error) {
-    throw error;
-  }
-}

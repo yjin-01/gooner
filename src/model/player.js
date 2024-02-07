@@ -8,8 +8,7 @@ module.exports = {
     try {
       const query = `SELECT * FROM persons`;
       connection = await db.getConnection();
-
-      const users = await executeQuery(connection, query);
+      const users = await connection.query(query);
 
       return users[0];
     } catch (err) {
@@ -53,7 +52,7 @@ module.exports = {
 
       connection = await db.getConnection();
 
-      const player = await executeQuery(connection, query);
+      const player = await connection.query(query);
 
       return player[0][0];
     } catch (err) {
@@ -84,7 +83,7 @@ module.exports = {
       `;
       connection = await db.getConnection();
 
-      const player = await executeQuery(connection, query);
+      const player = await connection.query(query);
 
       return player[0];
     } catch (err) {
@@ -121,7 +120,7 @@ module.exports = {
     `;
       connection = await db.getConnection();
 
-      const player = await executeQuery(connection, query);
+      const player = await connection.query(query);
 
       return player[0];
     } catch (err) {
@@ -135,12 +134,3 @@ module.exports = {
     }
   },
 };
-
-async function executeQuery(connection, query) {
-  try {
-    const results = await connection.query(query);
-    return results;
-  } catch (error) {
-    throw error;
-  }
-}
