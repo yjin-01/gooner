@@ -30,5 +30,36 @@ module.exports = {
       }
     }
   },
-};
 
+  // 팀별 시즌 목록 조회
+  getAllSeasonByTeamId: async (teamId) => {
+    let connection;
+
+    try {
+      const query = `
+          SELECT sbl.league_season 
+            FROM(
+            SELECT *
+            FROM league_participating_clubs_by_season lpcbs 
+            WHERE club_id = ${teamId}
+            ) sb
+          LEFT JOIN season_by_leagues sbl on sbl.season_by_league_id  = sb.season_by_league_id
+          GROUP BY sbl.league_season 
+      `;
+
+      connection = await db.getConnection();
+
+      const season = await connection.query(query);
+
+      return season[0];
+    } catch (err) {
+      logger.error('getAllSeasonByTeamId Model Error : ', err.stack);
+      console.error('Error', err.message);
+      return err;
+    } finally {
+      if (connection) {
+        await db.releaseConnection(connection);
+      }
+    }
+  },
+};
