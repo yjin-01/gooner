@@ -15,4 +15,15 @@ module.exports = {
       return null;
     }
   },
+
+  getAllSeason: async (teamId) => {
+    try {
+      const season = await seasonModel.getAllSeasonByTeamId(teamId);
+      return season;
+    } catch (err) {
+      console.error(err);
+      logger.error('getAllSeason Service Error : ', err.stack);
+      return null;
+    }
+  },
 };
