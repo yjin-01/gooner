@@ -9,8 +9,8 @@ module.exports = {
     try {
       const query =
         `
-        SELECT sb.match_id, c1.club_name as home_team_name, c1.image_url as home_team_iamge
-            , c2.club_name as away_team_name, c2.image_url as away_team_iamge
+        SELECT sb.match_id, c1.club_name as home_team_name, c1.image_url as home_team_image
+            , c2.club_name as away_team_name, c2.image_url as away_team_image
             , sb.match_date, sb.home_score, sb.away_score, sb.round, sb.is_finished, s.stadium_name, l.league_image_url 
         FROM(
             SELECT *
