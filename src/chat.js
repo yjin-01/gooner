@@ -12,23 +12,36 @@ module.exports = (server) => {
     console.log('새로운 클라이언트 접속', ip, socket.id, req.ip);
     socket.broadcast.emit('connection', '연결!!!!');
 
-    // 채팅방 참여하기
-    socket.on('join', (room) => {
-      socket.join(room, () => {
-        app.io.to(room).emit('join', room);
+    // 방 정보
+    let room = '';
+
+    // 방참여 요청
+    socket.on('req_join', ({ matchRoom }) => {
+      room = matchRoom;
+
+      socket.join(matchRoom, () => {
+        io.to(matchRoom).emit('noti_join', {
+          message: '채팅방에 입장하였습니다.',
+        });
       });
     });
 
     // 채팅방 나가기
-    socket.on('leave', (room) => {
-      socket.leave(room, () => {
-        app.io.to(room).emit('leave', room);
+    socket.on('req_leave', ({ matchRoom }) => {
+      socket.leave(matchRoom);
+      io.to(matchRoom).emit('noti_leave', {
+        message: '채팅방을 퇴장하였습니다.',
       });
+
+      // socket.leave(room, () => {
+      //   app.io.to(room).emit('leave', room);
+      // });
     });
 
-    socket.on('chatMessage', (room, name, msg) => {
-      // 해당 방의 모든 클라이언트에게 채팅 메시지 전송
-      app.io.to(room).emit('chatMessage', name, msg);
+    // 채팅방에 채팅 요청
+    socket.on('req_chatMessage', async ({ message }) => {
+      let userCurrentRoom = socket.room;
+      io.to(userCurrentRoom).emit('noti_chatMessage', { message });
     });
 
     //  에러 발생시
