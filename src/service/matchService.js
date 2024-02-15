@@ -20,4 +20,7 @@ module.exports = {
       return null;
     }
   },
+
+  // 상대 전적 조회
+  checkRelationalPerformance : async ()
 };
