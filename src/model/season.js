@@ -37,7 +37,7 @@ module.exports = {
 
     try {
       const query = `
-          SELECT sbl.league_season 
+          SELECT sbl.league_season AS season
             FROM(
             SELECT *
             FROM league_participating_clubs_by_season lpcbs 
