@@ -42,4 +42,32 @@ module.exports = {
       }
     }
   },
+
+  // 상대 전적 조회
+
+  checkRelativePerformance : async () =>{
+    let connection;
+
+    try{
+      const query =
+        `
+        SELECT * 
+        FROM match;
+      `;
+
+      connection = await db.getConnection();
+
+      const matchList = await connection.query(query);
+
+      return matchList[0];
+    }catch (err){
+      logger.error('checkRelativePerformance Model Error : ', err.stack);
+      console.error('Error', err.message);
+    } finally {
+      if(connection){
+        await db.releaseConnection(connection);
+      }
+    }
+  }
+
 };
