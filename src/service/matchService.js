@@ -1,19 +1,22 @@
 const matchModel = require('../model/match');
-const logger = require("../util/logger");
+const logger = require('../util/logger');
 
 module.exports = {
   // 팀 정보 조회
-  getMatchByTeamAndMonth: async (teamId, startDate, endDate) => {
+  getMatchByTeamAndSeason: async (teamId, season) => {
     try {
-      const matchList = await matchModel.getMatchByTeamAndMonth(
+      const seasonStartDate = season.split('-')[0] + '-07-01';
+      const seasonEndDate = season.split('-')[1] + '-06-30';
+
+      const matchList = await matchModel.getMatchByTeamAndSeason(
         teamId,
-        startDate,
-        endDate,
+        seasonStartDate,
+        seasonEndDate,
       );
       return matchList;
     } catch (err) {
       console.error(err);
-      logger.error('getOneteam Service Error : ', err.stack);
+      logger.error('getMatchByTeamAndSeason Service Error : ', err.stack);
       return null;
     }
   },
