@@ -3,13 +3,12 @@ const matchService = require('../service/matchService');
 
 module.exports = {
   // 팀 정보 조회
-  getMatchByTeamAndMonth: async (req, res) => {
+  getMatchByTeamAndSeason: async (req, res) => {
     try {
-      const { teamId, startDate, endDate } = req.query;
-      const matchList = await matchService.getMatchByTeamAndMonth(
+      const { teamId, season } = req.query;
+      const matchList = await matchService.getMatchByTeamAndSeason(
         teamId,
-        startDate,
-        endDate,
+        season,
       );
       resHandler.SuccessResponse(res, matchList, 200);
     } catch (err) {
