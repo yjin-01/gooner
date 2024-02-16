@@ -70,4 +70,10 @@ module.exports = {
     }
   }
 
+  // 라인업 - 1시간전
+
+  getTeamLineUp : async () =>{
+
+  }
+
 };

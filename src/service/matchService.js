@@ -22,5 +22,13 @@ module.exports = {
   },
 
   // 상대 전적 조회
-  checkRelationalPerformance : async ()
+  checkRelationalPerformance : async () => {
+
+  }
+
+  // 라인업 - 1시간전
+
+  getTeamLineUp : async () =>{
+
+  }
 };
