@@ -52,4 +52,9 @@ module.exports = {
       return null;
     }
   },
+
+  // 주목할 만한 선수
+  getNotablePlayer : async () =>{
+
+  }
 };
