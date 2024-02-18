@@ -16,32 +16,29 @@ module.exports = (server) => {
     let room = '';
 
     // 방참여 요청
-    socket.on('req_join', ({ matchRoom }) => {
-      room = matchRoom;
+    // socket.on('req_join', ({ matchRoom }) => {
+    //   room = matchRoom;
 
-      socket.join(matchRoom, () => {
-        io.to(matchRoom).emit('noti_join', {
-          message: '채팅방에 입장하였습니다.',
-        });
-      });
-    });
+    //   socket.join(matchRoom, () => {
+    //     io.to(matchRoom).emit('noti_join', {
+    //       message: '채팅방에 입장하였습니다.',
+    //     });
+    //   });
+    // });
 
-    // 채팅방 나가기
-    socket.on('req_leave', ({ matchRoom }) => {
-      socket.leave(matchRoom);
-      io.to(matchRoom).emit('noti_leave', {
-        message: '채팅방을 퇴장하였습니다.',
-      });
-
-      // socket.leave(room, () => {
-      //   app.io.to(room).emit('leave', room);
-      // });
-    });
+    // // 채팅방 나가기
+    // socket.on('req_leave', ({ matchRoom }) => {
+    //   socket.leave(matchRoom);
+    //   io.to(matchRoom).emit('noti_leave', {
+    //     message: '채팅방을 퇴장하였습니다.',
+    //   });
+    // });
 
     // 채팅방에 채팅 요청
-    socket.on('req_chatMessage', async ({ message }) => {
-      let userCurrentRoom = socket.room;
-      io.to(userCurrentRoom).emit('noti_chatMessage', { message });
+    socket.on('req_chatMessage', async (message) => {
+      socket.emit('noti_chatMessage', message);
+      // let userCurrentRoom = socket.room;
+      // io.to(userCurrentRoom).emit('noti_chatMessage', { message });
     });
 
     //  에러 발생시
