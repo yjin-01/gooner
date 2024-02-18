@@ -6,10 +6,7 @@ Arsenal팀에 관한 정보, 경기 일정, 경기 결과 등을 확인 할 수 
 <br/>
 
 # 🛠 기술 스택
-<p align="center">
-<img alt= "icon" wide="65" height="65" src ="https://techstack-generator.vercel.app/mysql-icon.svg">
-<img alt= "icon" wide="65" height="65" src ="https://techstack-generator.vercel.app/restapi-icon.svg">
-</p>
+- Node.js, Express, MySQL, RestAPI
 
 <br/>
 <br/>
@@ -18,6 +15,14 @@ Arsenal팀에 관한 정보, 경기 일정, 경기 결과 등을 확인 할 수 
 - ### 공통 구현
   - Database
     - 정규화를 기반으로 한 ERD 모델링
+  
+  - Swagger
+
+-  ### API 구현
+  - 팀/선수 정보 관련 API
+
+- ### 채팅 구현
+  - socket.io를 이용한 socket통신 연결
  
 
 
