@@ -22,13 +22,43 @@ module.exports = {
   },
 
   // 상대 전적 조회
-  checkRelationalPerformance : async () => {
-
-  }
+  checkRelationalPerformance: async () => {},
 
   // 라인업 - 1시간전
 
-  getTeamLineUp : async () =>{
+  getTeamLineUp: async () => {},
 
-  }
+  // 예정 경기 조회
+  getUpcomingMatch: async (teamId) => {
+    try {
+      const matchList = await matchModel.getUpcomingMatch(teamId);
+      return matchList;
+    } catch (err) {
+      console.error(err);
+      logger.error('getUpcomingMatch Service Error : ', err.stack);
+      return null;
+    }
+  },
+
+  // 최근 경기 결과 조회
+  getRecentlyMatch: async (teamId) => {
+    try {
+      const match = await matchModel.getRecentlyMatch(teamId);
+
+      if (!match) {
+        return {};
+      }
+
+      const matchId = match.match_id;
+
+      // 경기 상세 조회
+      const matchDetail = await matchModel.getMatchDetailByMatchId(matchId);
+
+      return { match, matchDetail };
+    } catch (err) {
+      console.error(err);
+      logger.error('getRecentlyMatch Service Error : ', err.stack);
+      return null;
+    }
+  },
 };
