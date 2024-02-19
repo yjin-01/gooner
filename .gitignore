@@ -4,3 +4,5 @@
 .idea
 .env.production
 .env.dev
+
+.README.md
