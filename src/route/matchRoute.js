@@ -3,6 +3,7 @@ const {
   getMatchByTeamAndSeason,
   getUpcomingMatch,
   getRecentlyMatch,
+  checkRelationalPerformance
 } = require('../controller/matchController');
 
 const matchRouter = Router();
@@ -13,7 +14,10 @@ matchRouter.get('/team', getMatchByTeamAndSeason);
 // Upcoming Matches 조회
 matchRouter.get('/team/upcoming', getUpcomingMatch);
 
-// Upcoming Matches 조회
+// Recently Matches 조회
 matchRouter.get('/team/recently', getRecentlyMatch);
+
+// 상대 전적 조회
+matchRouter.get('/relatvie-performance',checkRelationalPerformance);
 
 module.exports = matchRouter;

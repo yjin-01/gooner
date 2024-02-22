@@ -42,4 +42,17 @@ module.exports = {
       resHandler.FailedResponse(res, err.stack, 500);
     }
   },
+
+  // 상대 전적 조회
+  checkRelationalPerformance : async (req,res) =>{
+    try {
+      
+      const relativeResult = await matchService.checkRelationalPerformance();
+
+      resHandler.SuccessResponse(res, relativeResult, 200);
+    } catch (err) {
+      console.error(err);
+      resHandler.FailedResponse(res, err.stack, 500);
+    }
+  }
 };
