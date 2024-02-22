@@ -45,13 +45,17 @@ module.exports = {
 
   // 상대 전적 조회
 
-  checkRelativePerformance: async () => {
+  checkRelativePerformance: async (opponentId) => {
     let connection;
 
     try {
       const query = `
-        SELECT * 
-        FROM match;
+          SELECT home_team_id, away_team_id, home_score, away_score, match_result
+          FROM gooner.match
+          WHERE 1 = 1
+            AND ((away_team_id = 2 AND home_team_id = ${opponentId}) OR
+                 (home_team_id = 2 AND away_team_id = ${opponentId}))
+            AND is_finished = 1
       `;
 
       connection = await db.getConnection();
@@ -175,6 +179,36 @@ module.exports = {
       return matchDetail[0];
     } catch (err) {
       logger.error('getMatchDetailByMatchId Model Error : ', err.stack);
+      console.error('Error', err.message);
+    } finally {
+      if (connection) {
+        await db.releaseConnection(connection);
+      }
+    }
+  },
+
+  // 아직 진행되지 않은 아스날과 경기할 상대팀 조회 (최신 1개)
+
+  getOneUpcomingOpponent : async () =>{
+    let connection;
+
+    try {
+      const query = `
+          SELECT  match_id,if(away_team_id = 2,home_team_id,away_team_id) AS opponent 
+          FROM gooner.match
+          WHERE 1 = 1
+            AND is_finished = 0
+            AND (away_team_id = 2 OR home_team_id = 2)
+            LIMIT 1
+        `;
+
+      connection = await db.getConnection();
+
+      const opponentData = await connection.query(query);
+
+      return opponentData[0][0];
+    } catch (err) {
+      logger.error('getOneUpcomingOpponent Model Error : ', err.stack);
       console.error('Error', err.message);
     } finally {
       if (connection) {

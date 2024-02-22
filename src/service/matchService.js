@@ -22,7 +22,52 @@ module.exports = {
   },
 
   // 상대 전적 조회
-  checkRelationalPerformance: async () => {},
+  checkRelationalPerformance: async () => {
+    try {
+      const opponent = await matchModel.getOneUpcomingOpponent();
+      console.log(opponent);
+      const relativeMatchList = await matchModel.checkRelativePerformance(opponent.opponent);
+      console.log(relativeMatchList);
+      // 1안
+      // const isWin = (match) => (match.home_team_id === 2 && match.match_result === "HOME") || (match.away_team_id === 2 && match.match_result === "AWAY");
+      // const isLose = (match) => (match.away_team_id === 2 && match.match_result === "HOME") || (match.home_team_id === 2 && match.match_result === "AWAY");
+      // const isDraw = (match) => match.match_result === "DRAW";
+      //
+      // const updateResult = (relativeMatchList) => relativeMatchList.reduce((result, match) => {
+      //   if (isWin(match)) result.win++;
+      //   else if (isLose(match)) result.lose++;
+      //   else if (isDraw(match)) result.draw++;
+      //   return result;
+      // }, { win, lose, draw });
+      //
+      // const relativeResult = updateResult(relativeMatchList);
+
+
+      // 2안
+      const relativeResult = {
+        win : 0,
+        lose : 0,
+        draw : 0
+      }
+      for (match of relativeMatchList) {
+        if ((match.home_team_id === 2 && match.match_result === "HOME") || (match.away_team_id === 2 && match.match_result === "AWAY")) {
+          relativeResult.win++;
+        } else if ((match.away_team_id === 2 && match.match_result === "HOME") || (match.home_team_id === 2 && match.match_result === "AWAY")) {
+          relativeResult.lose++;
+        } else if (match.match_result === "DRAW") {
+          relativeResult.draw++;
+        }
+      }
+
+      return relativeResult;
+
+    } catch (err) {
+      console.error(err);
+      logger.error('checkRelationalPerformance Service Error : ', err.stack);
+      return null;
+    }
+
+  },
 
   // 라인업 - 1시간전
 
