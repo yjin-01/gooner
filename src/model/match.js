@@ -75,7 +75,8 @@ module.exports = {
 
   // 라인업 - 1시간전
 
-  getTeamLineUp: async () => {},
+  getTeamLineUp: async () => {
+  },
 
   // 예정 경기 조회
   getUpcomingMatch: async (teamId) => {
@@ -84,12 +85,20 @@ module.exports = {
     try {
       const query =
         `
-      SELECT sb.match_id, c1.club_id as home_team_id, c1.club_name as home_team_name, c1.team_nickname as home_team_nickname, c1.image_url as home_team_image
-            , c2.club_id as away_team_id, c2.club_name as away_team_name, c2.team_nickname as away_team_nickname, c2.image_url as away_team_image
-            , sb.match_date, s.stadium_name, l.league_image_url 
-      FROM (
-          SELECT *
-          FROM` +
+            SELECT sb.match_id
+                 , c1.club_id as home_team_id
+                 , c1.club_name as home_team_name
+                 , c1.team_nickname as home_team_nickname
+                 , c1.image_url as home_team_image
+                 , c2.club_id       as away_team_id
+                 , c2.club_name     as away_team_name
+                 , c2.team_nickname as away_team_nickname
+                 , c2.image_url     as away_team_image
+                 , sb.match_date
+                 , s.stadium_name
+                 , l.league_image_url
+            FROM (SELECT *
+                  FROM` +
         '`match`' +
         `m 
             WHERE  (m.home_team_id = 2 OR m.away_team_id = ${teamId})
@@ -126,12 +135,24 @@ module.exports = {
     try {
       const query =
         `
-        SELECT sb.match_id, c1.club_id as home_team_id, c1.club_name as home_team_name, c1.team_nickname as home_team_nickname, c1.image_url as home_team_image
-              , c2.club_id as away_team_id, c2.club_name as away_team_name, c2.team_nickname as away_team_nickname, c2.image_url as away_team_image
-              , sb.match_date, sb.home_score, sb.away_score, sb.round, sb.is_finished, s.stadium_name, l.league_image_url 
-        FROM (
-            SELECT *
-            FROM` +
+            SELECT sb.match_id
+                 , c1.club_id as home_team_id
+                 , c1.club_name as home_team_name
+                 , c1.team_nickname as home_team_nickname
+                 , c1.image_url as home_team_image
+                 , c2.club_id       as away_team_id
+                 , c2.club_name     as away_team_name
+                 , c2.team_nickname as away_team_nickname
+                 , c2.image_url     as away_team_image
+                 , sb.match_date
+                 , sb.home_score
+                 , sb.away_score
+                 , sb.round
+                 , sb.is_finished
+                 , s.stadium_name
+                 , l.league_image_url
+            FROM (SELECT *
+                  FROM` +
         '`match`' +
         `m 
               WHERE ( m.home_team_id = 2 OR m.away_team_id = ${teamId} )
@@ -167,10 +188,10 @@ module.exports = {
 
     try {
       const query = `
-        SELECT *
-        FROM match_details md 
+          SELECT *
+          FROM match_details md
           WHERE md.match_id = ${matchId}
-        `;
+      `;
 
       connection = await db.getConnection();
 
@@ -179,6 +200,35 @@ module.exports = {
       return matchDetail[0];
     } catch (err) {
       logger.error('getMatchDetailByMatchId Model Error : ', err.stack);
+      console.error('Error', err.message);
+    } finally {
+      if (connection) {
+        await db.releaseConnection(connection);
+      }
+    }
+  },
+
+  // 경기 결과 조회
+  updateMatchResult: async () => {
+    let connection;
+
+    try {
+      const query = `
+          UPDATE gooner.match
+          SET match_result = CASE
+              WHEN home_score > away_score THEN "HOME"
+              WHEN home_score < away_score THEN "AWAY"
+              ELSE "DRAW"
+              END
+          WHERE is_finished = 1;
+      `;
+
+      connection = await db.getConnection();
+
+      const matchResults = await connection.query(query);
+
+    } catch (err) {
+      logger.error('getMatchResult Model Error : ', err.stack);
       console.error('Error', err.message);
     } finally {
       if (connection) {
