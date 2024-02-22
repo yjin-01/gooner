@@ -1,6 +1,6 @@
 module.exports = {
-  SuccessResponse: (res, message, statusCode) => {
-    return res.status(statusCode).send({ result: message });
+  SuccessResponse: (res, resultData, statusCode) => {
+    return res.status(statusCode).send({ result: resultData });
   },
 
   FailedResponse: (res, ErrorMessage, statusCode) => {
