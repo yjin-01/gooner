@@ -1,5 +1,5 @@
 # ⚽️ Gooner
-### Arsenal 앱
+### Arsenal 팬 앱
 Arsenal팀에 관한 정보, 경기 일정, 경기 결과 등을 확인 할 수 있는 앱
 
 <br/>
@@ -7,6 +7,7 @@ Arsenal팀에 관한 정보, 경기 일정, 경기 결과 등을 확인 할 수 
 
 # 🛠 기술 스택
 - Node.js, Express, MySQL, RestAPI
+- AWS EC2, AWS RDS
 
 <br/>
 <br/>
@@ -18,13 +19,13 @@ Arsenal팀에 관한 정보, 경기 일정, 경기 결과 등을 확인 할 수 
   
   - Swagger
 
+-  ### 프로젝트 설계 및 설정
+    - AWS EC2 설정, AWS RDS 설정
+    - 프로젝트 구조 설계 및 세팅
+      
 -  ### API 구현
-    - 팀/선수 정보 관련 API
-    - 경기 일정 관련 API
-    - 경기 관련 API
-
-- ### 채팅 구현
-  - socket.io를 이용한 socket통신 연결
+    - 스케줄러 API
+    - 상대 전적 API
  
 <br/>
 <br/>
