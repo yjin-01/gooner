@@ -26,7 +26,9 @@ module.exports = {
     try {
       const opponent = await matchModel.getOneUpcomingOpponent();
       console.log(opponent);
-      const relativeMatchList = await matchModel.checkRelativePerformance(opponent.opponent);
+      const relativeMatchList = await matchModel.checkRelativePerformance(
+        opponent.opponent,
+      );
       console.log(relativeMatchList);
       // 1안
       // const isWin = (match) => (match.home_team_id === 2 && match.match_result === "HOME") || (match.away_team_id === 2 && match.match_result === "AWAY");
@@ -42,31 +44,34 @@ module.exports = {
       //
       // const relativeResult = updateResult(relativeMatchList);
 
-
       // 2안
       const relativeResult = {
-        win : 0,
-        lose : 0,
-        draw : 0
-      }
+        win: 0,
+        lose: 0,
+        draw: 0,
+      };
       for (match of relativeMatchList) {
-        if ((match.home_team_id === 2 && match.match_result === "HOME") || (match.away_team_id === 2 && match.match_result === "AWAY")) {
+        if (
+          (match.home_team_id === 2 && match.match_result === 'HOME') ||
+          (match.away_team_id === 2 && match.match_result === 'AWAY')
+        ) {
           relativeResult.win++;
-        } else if ((match.away_team_id === 2 && match.match_result === "HOME") || (match.home_team_id === 2 && match.match_result === "AWAY")) {
+        } else if (
+          (match.away_team_id === 2 && match.match_result === 'HOME') ||
+          (match.home_team_id === 2 && match.match_result === 'AWAY')
+        ) {
           relativeResult.lose++;
-        } else if (match.match_result === "DRAW") {
+        } else if (match.match_result === 'DRAW') {
           relativeResult.draw++;
         }
       }
 
       return relativeResult;
-
     } catch (err) {
       console.error(err);
       logger.error('checkRelationalPerformance Service Error : ', err.stack);
       return null;
     }
-
   },
 
   // 라인업 - 1시간전
@@ -85,21 +90,21 @@ module.exports = {
     }
   },
 
-  // 최근 경기 결과 조회
+  // 가장 최근 경기 결과 조회
   getRecentlyMatch: async (teamId) => {
     try {
-      const match = await matchModel.getRecentlyMatch(teamId);
+      const match = await matchModel.getRecentlyMatch(teamId, 1);
 
       if (!match) {
         return {};
       }
 
-      const matchId = match.match_id;
+      const matchId = match[0].match_id;
 
       // 경기 상세 조회
       const matchDetail = await matchModel.getMatchDetailByMatchId(matchId);
 
-      return { match, matchDetail };
+      return { match: match[0], matchDetail };
     } catch (err) {
       console.error(err);
       logger.error('getRecentlyMatch Service Error : ', err.stack);
