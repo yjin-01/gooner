@@ -45,13 +45,17 @@ module.exports = {
 
   // 상대 전적 조회
 
-  checkRelativePerformance: async () => {
+  checkRelativePerformance: async (opponentId) => {
     let connection;
 
     try {
       const query = `
-        SELECT * 
-        FROM match;
+          SELECT home_team_id, away_team_id, home_score, away_score, match_result
+          FROM gooner.match
+          WHERE 1 = 1
+            AND ((away_team_id = 2 AND home_team_id = ${opponentId}) OR
+                 (home_team_id = 2 AND away_team_id = ${opponentId}))
+            AND is_finished = 1
       `;
 
       connection = await db.getConnection();
@@ -80,12 +84,20 @@ module.exports = {
     try {
       const query =
         `
-      SELECT sb.match_id, c1.club_id as home_team_id, c1.club_name as home_team_name, c1.team_nickname as home_team_nickname, c1.image_url as home_team_image
-            , c2.club_id as away_team_id, c2.club_name as away_team_name, c2.team_nickname as away_team_nickname, c2.image_url as away_team_image
-            , sb.match_date, s.stadium_name, l.league_image_url 
-      FROM (
-          SELECT *
-          FROM` +
+            SELECT sb.match_id
+                 , c1.club_id as home_team_id
+                 , c1.club_name as home_team_name
+                 , c1.team_nickname as home_team_nickname
+                 , c1.image_url as home_team_image
+                 , c2.club_id       as away_team_id
+                 , c2.club_name     as away_team_name
+                 , c2.team_nickname as away_team_nickname
+                 , c2.image_url     as away_team_image
+                 , sb.match_date
+                 , s.stadium_name
+                 , l.league_image_url
+            FROM (SELECT *
+                  FROM` +
         '`match`' +
         `m 
             WHERE  (m.home_team_id = 2 OR m.away_team_id = ${teamId})
@@ -116,24 +128,36 @@ module.exports = {
   },
 
   // 최근 경기 결과 조회
-  getRecentlyMatch: async (teamId) => {
+  getRecentlyMatch: async (teamId, count) => {
     let connection;
 
     try {
       const query =
         `
-        SELECT sb.match_id, c1.club_id as home_team_id, c1.club_name as home_team_name, c1.team_nickname as home_team_nickname, c1.image_url as home_team_image
-              , c2.club_id as away_team_id, c2.club_name as away_team_name, c2.team_nickname as away_team_nickname, c2.image_url as away_team_image
-              , sb.match_date, sb.home_score, sb.away_score, sb.round, sb.is_finished, s.stadium_name, l.league_image_url 
-        FROM (
-            SELECT *
-            FROM` +
+            SELECT sb.match_id
+                 , c1.club_id as home_team_id
+                 , c1.club_name as home_team_name
+                 , c1.team_nickname as home_team_nickname
+                 , c1.image_url as home_team_image
+                 , c2.club_id       as away_team_id
+                 , c2.club_name     as away_team_name
+                 , c2.team_nickname as away_team_nickname
+                 , c2.image_url     as away_team_image
+                 , sb.match_date
+                 , sb.home_score
+                 , sb.away_score
+                 , sb.round
+                 , sb.is_finished
+                 , s.stadium_name
+                 , l.league_image_url
+            FROM (SELECT *
+                  FROM` +
         '`match`' +
         `m 
-              WHERE ( m.home_team_id = 2 OR m.away_team_id = ${teamId} )
+              WHERE ( m.home_team_id = ${teamId} OR m.away_team_id = ${teamId} )
                 AND m.is_finished = 1
             ORDER BY match_date DESC
-            LIMIT 1
+            LIMIT ${count}
         ) sb
         LEFT JOIN clubs c1 ON c1.club_id = sb.home_team_id #and c1.club_id = sb.away_team_id
         LEFT JOIN clubs c2 ON c2.club_id = sb.away_team_id
@@ -146,7 +170,7 @@ module.exports = {
 
       const matchList = await connection.query(query);
 
-      return matchList[0][0];
+      return matchList[0];
     } catch (err) {
       logger.error('getRecentlyMatch Model Error : ', err.stack);
       console.error('Error', err.message);
@@ -163,10 +187,10 @@ module.exports = {
 
     try {
       const query = `
-        SELECT *
-        FROM match_details md 
+          SELECT *
+          FROM match_details md
           WHERE md.match_id = ${matchId}
-        `;
+      `;
 
       connection = await db.getConnection();
 
@@ -175,6 +199,64 @@ module.exports = {
       return matchDetail[0];
     } catch (err) {
       logger.error('getMatchDetailByMatchId Model Error : ', err.stack);
+      console.error('Error', err.message);
+    } finally {
+      if (connection) {
+        await db.releaseConnection(connection);
+      }
+    }
+  },
+
+  // 경기 결과 조회
+  updateMatchResult: async () => {
+    let connection;
+
+    try {
+      const query = `
+          UPDATE gooner.match
+          SET match_result = CASE
+              WHEN home_score > away_score THEN "HOME"
+              WHEN home_score < away_score THEN "AWAY"
+              ELSE "DRAW"
+              END
+          WHERE is_finished = 1;
+      `;
+
+      connection = await db.getConnection();
+
+      const matchResults = await connection.query(query);
+    } catch (err) {
+      logger.error('getMatchResult Model Error : ', err.stack);
+      console.error('Error', err.message);
+    } finally {
+      if (connection) {
+        await db.releaseConnection(connection);
+      }
+    }
+  },
+
+  // 아직 진행되지 않은 아스날과 경기할 상대팀 조회 (최신 1개)
+
+  getOneUpcomingOpponent: async () => {
+    let connection;
+
+    try {
+      const query = `
+          SELECT  match_id,if(away_team_id = 2,home_team_id,away_team_id) AS opponent 
+          FROM gooner.match
+          WHERE 1 = 1
+            AND is_finished = 0
+            AND (away_team_id = 2 OR home_team_id = 2)
+            LIMIT 1
+        `;
+
+      connection = await db.getConnection();
+
+      const opponentData = await connection.query(query);
+
+      return opponentData[0][0];
+    } catch (err) {
+      logger.error('getOneUpcomingOpponent Model Error : ', err.stack);
       console.error('Error', err.message);
     } finally {
       if (connection) {
