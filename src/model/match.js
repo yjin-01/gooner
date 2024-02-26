@@ -75,8 +75,7 @@ module.exports = {
 
   // 라인업 - 1시간전
 
-  getTeamLineUp: async () => {
-  },
+  getTeamLineUp: async () => {},
 
   // 예정 경기 조회
   getUpcomingMatch: async (teamId) => {
@@ -129,7 +128,7 @@ module.exports = {
   },
 
   // 최근 경기 결과 조회
-  getRecentlyMatch: async (teamId) => {
+  getRecentlyMatch: async (teamId, count) => {
     let connection;
 
     try {
@@ -155,10 +154,10 @@ module.exports = {
                   FROM` +
         '`match`' +
         `m 
-              WHERE ( m.home_team_id = 2 OR m.away_team_id = ${teamId} )
+              WHERE ( m.home_team_id = ${teamId} OR m.away_team_id = ${teamId} )
                 AND m.is_finished = 1
             ORDER BY match_date DESC
-            LIMIT 1
+            LIMIT ${count}
         ) sb
         LEFT JOIN clubs c1 ON c1.club_id = sb.home_team_id #and c1.club_id = sb.away_team_id
         LEFT JOIN clubs c2 ON c2.club_id = sb.away_team_id
@@ -171,7 +170,7 @@ module.exports = {
 
       const matchList = await connection.query(query);
 
-      return matchList[0][0];
+      return matchList[0];
     } catch (err) {
       logger.error('getRecentlyMatch Model Error : ', err.stack);
       console.error('Error', err.message);
@@ -226,7 +225,6 @@ module.exports = {
       connection = await db.getConnection();
 
       const matchResults = await connection.query(query);
-
     } catch (err) {
       logger.error('getMatchResult Model Error : ', err.stack);
       console.error('Error', err.message);
@@ -239,7 +237,7 @@ module.exports = {
 
   // 아직 진행되지 않은 아스날과 경기할 상대팀 조회 (최신 1개)
 
-  getOneUpcomingOpponent : async () =>{
+  getOneUpcomingOpponent: async () => {
     let connection;
 
     try {

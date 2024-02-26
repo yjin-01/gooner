@@ -6,8 +6,8 @@ module.exports = {
   getOneTeam: async (req, res) => {
     try {
       const { teamId } = req.query;
-      const team = await teamService.getOneTeam(teamId);
-      resHandler.SuccessResponse(res, team, 200);
+      const result = await teamService.getOneTeam(teamId);
+      resHandler.SuccessResponse(res, result, 200);
     } catch (err) {
       console.error(err);
       resHandler.FailedResponse(res, err.stack, 500);
