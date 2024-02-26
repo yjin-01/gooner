@@ -10,10 +10,9 @@ module.exports = (server) => {
     const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress; //ip 추출
     // socket.io는 연결할 때마다 id부여 => id를 통해 특정인에게 메세지 전송 가능
     console.log('새로운 클라이언트 접속', ip, socket.id, req.ip);
-    socket.broadcast.emit('connection', '연결!!!!');
 
-    // 방 정보
-    let room = '';
+    // 방 정보 (추후 추가 예정)
+    // let room = '';
 
     // 방참여 요청
     // socket.on('req_join', ({ matchRoom }) => {
@@ -35,10 +34,9 @@ module.exports = (server) => {
     // });
 
     // 채팅방에 채팅 요청
-    socket.on('req_chatMessage', async (message) => {
-      socket.emit('noti_chatMessage', message);
-      // let userCurrentRoom = socket.room;
-      // io.to(userCurrentRoom).emit('noti_chatMessage', { message });
+    socket.on('req_chatMessage', async (userId, message) => {
+      // 나를 포함한 모든 사람에게 전송
+      io.sockets.emit('noti_chatMessage', userId, message);
     });
 
     //  에러 발생시
