@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 
-const schedulerTask = require("./scheduler");
+// const schedulerTask = require("./scheduler");
 const WebSocket = require('./chat');
 
 // 추가적인 미들웨어 여기에 추가
@@ -28,7 +28,7 @@ function createServerConfig(config, route) {
   configureRoutes(app, route);
 
   // 서버 시작시 스케줄러 동작
-  schedulerTask.update_match_result();
+  // schedulerTask.update_match_result();
 
   function start() {
     const socket = app.listen(port, () => {
