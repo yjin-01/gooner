@@ -50,10 +50,10 @@ module.exports = {
 
   createUser: async (req, res) => {
     try {
-      const { userId, nickname, password, teamId } = req.body;
+      const { email, nickname, password, teamId } = req.body;
 
       const user = await userService.createUser({
-        userId,
+        email,
         nickname,
         password,
         teamId,
