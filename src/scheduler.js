@@ -31,11 +31,18 @@ const crawler = (async () => {
 
     const browser = await puppeteer.launch({ headless: false });
     const page = await browser.newPage();
+    // 페이지 로드 시간 설정 (기본값 : 30초)
+    page.setDefaultNavigationTimeout(60000); // 60초로 설정
+
+    // 페이지로 이동하고 로드될 때까지 대기
+
+    // 브라우저의 뷰포트(viewport) 크기를 설정하는 메서드
     await page.setViewport({
-      width: 1920,
-      height: 1080,
+      width: 1920, // 뷰포트의 너비를 1920 픽셀로 설정
+      height: 1080, // 뷰포트의 높이를 1080 픽셀로 설정
     });
-    await page.goto('https://kr.soccerway.com/national/england/premier-league/20232024/regular-season/r76443/');
+    // 크롤링할 페이지로 이동
+    await page.goto('https://kr.soccerway.com/national/england/premier-league/20232024/regular-season/r76443/', {waitUntil : "domcontentloaded"});
 
     const rowData = await page.evaluate(() => {
       return document.querySelector('#page_competition_1_block_competition_tables_11').innerText;
@@ -108,7 +115,7 @@ const crawler = (async () => {
 
     }
     console.log(premierLeagueData);
-
+    await browser.close();
   } catch (err) {
     console.error('Error fetching websites : ', err);
   }
