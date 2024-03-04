@@ -15,13 +15,16 @@ const pool = genericPool.createPool({
       throw err;
     }
   },
-  enableKeepAlive: true,
   destroy: function (connection) {
     return connection.end();
   },
 });
 
 module.exports = {
+  // 문자열 이스케이프
+  getEscape: async function (text) {
+    return mysql2.escape(text);
+  },
   // 풀에서 커넥션 획득
   getConnection: async function () {
     return await pool.acquire();
