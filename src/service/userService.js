@@ -3,6 +3,7 @@ const userModel = require('../model/user');
 const logger = require('../util/logger');
 const mailSender = require('../util/email');
 const moment = require('moment');
+const { createSalt, createHashedPassword } = require('../util/crypto');
 
 module.exports = {
   findAll: async () => {
@@ -112,7 +113,6 @@ module.exports = {
   createUser: async ({ email, nickname, password, teamId }) => {
     try {
       // 이메일 & 닉네임 중복 확인
-
       const [userEamil, userNickname] = await Promise.all([
         userModel.getUserByEmail({ email }),
         userModel.getUserByNickname({ nickname }),
@@ -130,25 +130,33 @@ module.exports = {
         return '인증되지 않은 이메일입니다.';
       }
 
-      const time = moment().diff(checkedEmail.created_at, 'minutes');
+      // 서버 시간 & DB 시간 불일치로 보류
+      // const time = moment().diff(checkedEmail.created_at, 'minutes');
 
-      console.log(time);
+      // if (time > 60) {
+      //   return '인증 유효 시간이 만료되었습니다.';
+      // }
 
-      if (time > 60) {
-        return '인증 유효 시간이 만료되었습니다.';
-      }
+      const userSalt = await createSalt();
+      const hashedPassword = await createHashedPassword(password, userSalt);
 
-      const user = await userModel.createUser({
+      const result = await userModel.createUser({
         email,
         nickname,
-        password,
+        hashedPassword,
+        userSalt,
         teamId,
       });
 
-      return user;
+      if (result.affectedRows !== 1) {
+        throw new Error('회원가입에 실패하였습니다.');
+      }
+
+      return '회원가입에 성공하였습니다.';
     } catch (err) {
       console.error(err);
       logger.error('createUser Service Error : ', err.stack);
+      throw err;
     }
   },
 };
