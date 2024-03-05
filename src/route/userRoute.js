@@ -11,13 +11,14 @@ userRouter.post(
   userController.checkedVerificationNumber,
 );
 
+userRouter.post('/login', userController.login);
+userRouter.post('/', userController.createUser);
+
 userRouter.get('/', userController.userFindAll);
 userRouter.get('/test', (req, res) => {
   res.send('test');
 });
 
 userRouter.get('/nickname', userController.checkedNickname);
-
-userRouter.post('/', userController.createUser);
 
 module.exports = userRouter;

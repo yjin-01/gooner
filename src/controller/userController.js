@@ -1,3 +1,4 @@
+const authService = require('../service/authService');
 const userService = require('../service/userService');
 const resHandler = require('../util/resHandler');
 
@@ -52,14 +53,27 @@ module.exports = {
     try {
       const { email, nickname, password, teamId } = req.body;
 
-      const user = await userService.createUser({
+      const result = await userService.createUser({
         email,
         nickname,
         password,
         teamId,
       });
 
-      resHandler.SuccessResponse(res, user, 200);
+      resHandler.SuccessResponse(res, result, 200);
+    } catch (err) {
+      console.error(err);
+      resHandler.FailedResponse(res, err.stack, 500);
+    }
+  },
+
+  login: async (req, res) => {
+    try {
+      const { email, password } = req.body;
+
+      const result = await authService.login({ email, password });
+
+      resHandler.SuccessResponse(res, result, 200);
     } catch (err) {
       console.error(err);
       resHandler.FailedResponse(res, err.stack, 500);
