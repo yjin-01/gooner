@@ -73,13 +73,18 @@ module.exports = {
   },
 
   // 회원가입
-  createUser: async ({ userId, nickname, password, teamId }) => {
+  createUser: async ({ email, nickname, hashedPassword, userSalt, teamId }) => {
     let connection;
     try {
       const query = ` 
               INSERT INTO users
-              (user_id, nickname, password, club_id) 
-              VALUES (${userId}, ${nickname}, ${password}, ${teamId})
+              (email, nickname, password, salt, club_id) 
+              VALUES (
+                ${await db.getEscape(email)},
+                ${await db.getEscape(nickname)}, 
+                ${await db.getEscape(hashedPassword)}, 
+                ${await db.getEscape(userSalt)}, 
+                ${await db.getEscape(teamId)})
           `;
       connection = await db.getConnection();
       const results = await connection.query(query);
@@ -88,7 +93,7 @@ module.exports = {
     } catch (err) {
       logger.error('createUser model Error : ', err.stack);
       console.error('Error', err.message);
-      return err;
+      throw err;
     } finally {
       if (connection) {
         await db.releaseConnection(connection);
@@ -96,7 +101,7 @@ module.exports = {
     }
   },
 
-  // 인증 테이블 조회(email)
+  // 이메일 인증 테이블 조회(email)
   getEmailVerificationByEmail: async ({ email }) => {
     let connection;
     try {
@@ -121,7 +126,7 @@ module.exports = {
     }
   },
 
-  // 인증번호 저장
+  // 이메일 인증번호 저장
   saveVerificationNumber: async ({ email, randomNumber }) => {
     let connection;
     try {
@@ -147,6 +152,7 @@ module.exports = {
     }
   },
 
+  // 이메일 인증 상태 업데이트
   updateVerificationStatus: async ({ email }) => {
     let connection;
     try {
@@ -170,6 +176,7 @@ module.exports = {
     }
   },
 
+  // 이메일 인증 번호 삭제
   deleteVerificationNumber: async ({ email }) => {
     let connection;
     try {
