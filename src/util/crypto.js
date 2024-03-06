@@ -1,7 +1,7 @@
-const crypto = require("crypto");
-const util = require("util");
-const logger = require("./logger");
-const dotenv = require("dotenv").config();
+const crypto = require('crypto');
+const util = require('util');
+const logger = require('./logger');
+const dotenv = require('dotenv').config();
 
 const pdkdf2Promise = util.promisify(crypto.pbkdf2);
 const randomBytesPromise = util.promisify(crypto.randomBytes);
@@ -10,7 +10,7 @@ module.exports = {
   // Salt 생성
   createSalt: async () => {
     const salt = await randomBytesPromise(64);
-    return salt.toString("base64");
+    return salt.toString('base64');
   },
 
   // 비밀번호 (암호화) -> 단방향 암호화
@@ -22,14 +22,14 @@ module.exports = {
         salt,
         Number(process.env.KEY_STRETCHING),
         64,
-        "sha512"
+        'sha512',
       );
 
-      const hashedPassword = key.toString("base64");
+      const hashedPassword = key.toString('base64');
 
       return hashedPassword;
     } catch (err) {
-      logger.error("createHashedPassword Error : ", err.stack);
+      logger.error('createHashedPassword Error : ', err.stack);
       return null;
     }
   },
@@ -42,14 +42,14 @@ module.exports = {
         userSalt,
         Number(process.env.KEY_STRETCHING),
         64,
-        "sha512"
+        'sha512',
       );
-      const hashedPassword = key.toString("base64");
+      const hashedPassword = key.toString('base64');
 
       if (hashedPassword !== userPwd) return false;
       return true;
     } catch (err) {
-      logger.error("verifyPassword Error : ", err.stack);
+      logger.error('verifyPassword Error : ', err.stack);
       return false;
     }
   },
