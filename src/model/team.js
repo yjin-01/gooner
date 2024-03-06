@@ -1,6 +1,6 @@
 const db = require('../loader/db');
 const logger = require('../util/logger');
-
+const teamQuery = require("../queries/teamQueries");
 module.exports = {
   // 팀 정보 조회
   getOneTeam: async (teamId) => {
@@ -37,5 +37,51 @@ module.exports = {
       }
     }
   },
+
+  // 클럽별 ID, 이름 조회
+  getClubInfo : async (teamId) =>{
+    let connection;
+    try {
+      const query = `
+          SELECT lpc.participating_club_id, c.club_id, c.club_name
+          FROM league_participating_clubs_by_season lpc
+          LEFT JOIN gooner.clubs c ON c.club_id = lpc.club_id
+      `;
+
+      connection = await db.getConnection();
+      const clubs = await connection.query(query);
+
+      return clubs[0];
+    } catch (err) {
+      logger.error('getClubInfo Model Error : ', err.stack);
+      console.error('Error', err.message);
+      return err;
+    } finally {
+      if (connection) {
+        await db.releaseConnection(connection);
+      }
+    }
+  },
+
+  // 클럽별 총 성적 업데이트
+  updateClubPerformance : async (clubList) =>{
+    let connection;
+    try {
+      const query = await teamQuery.updateClubPerformanceQuery(clubList);
+      connection = await db.getConnection();
+      const result = await connection.query(query);
+      return result[0];
+
+    } catch (err) {
+      logger.error('updateClubPerformance Model Error : ', err.stack);
+      console.error('Error', err.message);
+      return err;
+    } finally {
+      if (connection) {
+        await db.releaseConnection(connection);
+      }
+    }
+  }
+
 };
 

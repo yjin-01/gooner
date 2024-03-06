@@ -7,7 +7,6 @@ const logger = require('../src/util/logger');
 const matchModel = require('../src/model/match');
 const teamService = require('../src/service/teamService');
 
-
 module.exprots = {
   // 경기 결과 업데이트
   updateMatchResult: scheduler.scheduleJob('0 0 * * * ', async () => {
@@ -28,16 +27,16 @@ module.exprots = {
 
   // 클럽별 성적 업데이트 (업데이트 예정 - 경기 끝난 후)
   updateClubPerformance : scheduler.scheduleJob('0 0 * * *', async () =>{
-    logger.info("UpdateClubPerformance");
-
+    logger.info("Start UpdateClubPerformance Scheduler");
     try{
-      // 클럽 리스트 가져오기
-      const clubList = await teamService.getClubInfo();
 
-      console.log(clubList);
+      const result = await teamService.updateClubPerformance();
 
-      for(let)
-
+      if(result.affectedRows){
+        logger.info("Success UpdateClubPerformance Scheduler");
+      } else {
+        logger.info("Failed UpdateClubPerformance Scheduler OR Not at all");
+      }
 
     } catch (err) {
       logger.error("Error updating club performance : ", err) ;
