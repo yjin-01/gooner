@@ -19,14 +19,52 @@ Arsenal팀에 관한 정보, 경기 일정, 경기 결과 등을 확인 할 수 
   
   - Swagger
 
--  ### 프로젝트 설계 및 설정
-    - AWS EC2 설정, AWS RDS 설정
-    - 프로젝트 구조 설계 및 세팅
-      
--  ### API 구현
-    - 스케줄러 API
-    - 상대 전적 API
+-  ### 조회 API 구현
+    - 팀/선수 정보 관련 API
+    - 경기 일정 관련 API
+    - 경기 관련 API
  
+- ### User API 구현
+
+- ### 채팅 구현
+  - socket.io를 이용한 socket통신 연결
+ 
+<br/>
+<br/>
+
+# 📱 기능 시현
+<table>
+  <thead>
+    <tr>
+      <th align="center">Home</th>
+      <th align="center">Players</th>
+      <th align="center">Matches</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="center"><img width="270px" src="https://github.com/yjin-01/gooner/blob/main/public/home.gif?raw=true" /></td>
+      <td align="center"><img width="270px"src="https://github.com/yjin-01/gooner/blob/main/public/player.gif?raw=true" /></td>
+      <td align="center"><img width="270px" src="https://github.com/yjin-01/gooner/blob/main/public/match02.gif?raw=true" /></td>
+    </tr>
+  </tbody>
+</table>
+
+<table>
+  <thead>
+    <tr>
+      <th align="center">TeamDetail</th>
+      <th align="center">Chat</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="center"><img width="270px" src="https://github.com/yjin-01/gooner/blob/main/public/teamDetail.gif?raw=true"  /></td>
+      <td align="center"><img width="270px" src="https://github.com/yjin-01/gooner/blob/main/public/chat.gif?raw=true" /></td>
+    </tr>
+  </tbody>
+</table>
+
 <br/>
 <br/>
 
