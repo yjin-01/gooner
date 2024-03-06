@@ -24,7 +24,7 @@ module.exports = {
     try {
       const clubList = await teamModel.getClubInfo();
       const premierLeagueList = await crawler.totalMatchesBySeason();
-      const result = await teamModel.insertClubPerformance(clubList,premierLeagueList);
+      const result = await teamModel.updateClubPerformance(clubList,premierLeagueList);
       return result;
     } catch (err) {
       console.error(err);
