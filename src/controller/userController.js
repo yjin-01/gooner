@@ -1,5 +1,6 @@
 const authService = require('../service/authService');
 const userService = require('../service/userService');
+const pushSender = require('../util/push');
 const resHandler = require('../util/resHandler');
 
 module.exports = {
@@ -72,6 +73,27 @@ module.exports = {
       const { email, password } = req.body;
 
       const result = await authService.login({ email, password });
+
+      resHandler.SuccessResponse(res, result, 200);
+    } catch (err) {
+      console.error(err);
+      resHandler.FailedResponse(res, err.stack, 500);
+    }
+  },
+
+  pushTest: async (req, res) => {
+    try {
+      const { deviceToken } = req.body;
+
+      let pushOption = {
+        notification: {
+          title: '테스트 푸쉬 발송',
+          body: '보내지나요?',
+        },
+        token: deviceToken,
+      };
+
+      const result = await pushSender.sendToPush({ pushOption });
 
       resHandler.SuccessResponse(res, result, 200);
     } catch (err) {
