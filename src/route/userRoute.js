@@ -19,7 +19,7 @@ userRouter.get('/test', (req, res) => {
   res.send('test');
 });
 
-userRouter.get('/push', userController.pushTest);
+userRouter.post('/push', userController.pushTest);
 
 userRouter.get('/nickname', userController.checkedNickname);
 
