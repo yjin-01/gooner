@@ -83,10 +83,16 @@ module.exports = {
 
   pushTest: async (req, res) => {
     try {
+      // 특정기기에 전송
       const { deviceToken } = req.body;
 
+      // 안드로이드
       let pushOption = {
         notification: {
+          title: '테스트 푸쉬 발송',
+          body: '보내지나요?',
+        },
+        data: {
           title: '테스트 푸쉬 발송',
           body: '보내지나요?',
         },
