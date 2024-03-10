@@ -70,9 +70,9 @@ module.exports = {
 
   login: async (req, res) => {
     try {
-      const { email, password } = req.body;
+      const { email, password, deviceToken } = req.body;
 
-      const result = await authService.login({ email, password });
+      const result = await authService.login({ email, password, deviceToken });
 
       resHandler.SuccessResponse(res, result, 200);
     } catch (err) {

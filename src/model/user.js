@@ -101,6 +101,29 @@ module.exports = {
     }
   },
 
+  saveDeviceToken: async ({ userId, deviceToken }) => {
+    let connection;
+    try {
+      const query = ` 
+              UPDATE users
+              SET device_token =  ${await db.getEscape(deviceToken)}
+              WHERE user_id = ${await db.getEscape(userId)}
+          `;
+      connection = await db.getConnection();
+      const results = await connection.query(query);
+
+      return results[0][0];
+    } catch (err) {
+      logger.error('createUser model Error : ', err.stack);
+      console.error('Error', err.message);
+      throw err;
+    } finally {
+      if (connection) {
+        await db.releaseConnection(connection);
+      }
+    }
+  },
+
   // 이메일 인증 테이블 조회(email)
   getEmailVerificationByEmail: async ({ email }) => {
     let connection;

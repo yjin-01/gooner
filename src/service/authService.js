@@ -11,7 +11,7 @@ const logger = require('../util/logger');
 const userModel = require('../model/user');
 
 module.exports = {
-  login: async ({ email, password }) => {
+  login: async ({ email, password, deviceToken }) => {
     try {
       const user = await userModel.getUserByEmail({ email });
 
@@ -26,9 +26,17 @@ module.exports = {
         return '로그인에 실패하였습니다.';
       }
 
+      // 디바이스 토큰 저장
+      await userModel.saveDeviceToken({ userId: user.user_id, deviceToken });
+
       const accessToken = jwt.createAccessToken(user.email);
 
-      return accessToken;
+      return {
+        email: user.email,
+        nickname: user.nickname,
+        teamId: user.club_id,
+        accessToken,
+      };
     } catch (error) {
       console.log(error);
       throw new Error('Login failed');
