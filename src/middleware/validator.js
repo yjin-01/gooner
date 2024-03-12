@@ -1,12 +1,14 @@
 const { validationResult } = require('express-validator');
 
-validatorErrorCheck = (req, res, next) => {
-  const errors = validationResult(req);
+const validatorMiddleware = {
+  validatorErrorCheck: (req, res, next) => {
+    const errors = validationResult(req);
 
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-  next();
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array()[0].msg });
+    }
+    return next();
+  },
 };
 
-module.exports = validatorErrorCheck;
+module.exports = validatorMiddleware;

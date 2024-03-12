@@ -26,16 +26,13 @@ module.exports = {
       }
 
       // 인증번호 발급
-      const randomNumber = String(Math.floor(Math.random() * 1000000)).padStart(
-        6,
-        '0',
-      );
+      const code = String(Math.floor(Math.random() * 1000000)).padStart(6, '0');
 
       // 이메일 전송
       const verifyMailOptions = {
         to: email,
         subject: 'Gooner 인증번호 메일',
-        text: `인증번호: ${randomNumber}`,
+        text: `인증번호: ${code}`,
       };
 
       const sendResult = await mailSender.sendToEmail({
@@ -58,10 +55,13 @@ module.exports = {
         await userModel.deleteVerificationNumber({ email });
       }
 
+      const issueTime = moment().format('YYYY-MM-DD hh:mm:ss');
+
       // 이메일, 인증번호 저장
       await userModel.saveVerificationNumber({
         email,
-        randomNumber,
+        code,
+        issueTime,
       });
 
       return '메일 전송 성공';
@@ -72,13 +72,13 @@ module.exports = {
     }
   },
 
-  checkedVerificationNumber: async ({ email, number }) => {
+  checkedVerificationNumber: async ({ email, code }) => {
     try {
       const checkedVerfication = await userModel.getEmailVerificationByEmail({
         email,
       });
 
-      if (checkedVerfication.verification_number !== number) {
+      if (checkedVerfication.verification_code !== code) {
         return '인증에 실패하였습니다';
       } else if (checkedVerfication.is_verified === 1) {
         return '이미 인증된 이메일입니다.';
@@ -113,13 +113,16 @@ module.exports = {
   createUser: async ({ email, nickname, password, teamId }) => {
     try {
       // 이메일 & 닉네임 중복 확인
-      const [userEamil, userNickname] = await Promise.all([
-        userModel.getUserByEmail({ email }),
-        userModel.getUserByNickname({ nickname }),
-      ]);
+      const userEamil = await userModel.getUserByEmail({ email });
 
-      if (userEamil || userNickname) {
-        return '이메일 또는 닉네임이 중복되었습니다.';
+      if (userEamil) {
+        return '이미 가입된 이메일입니다.';
+      }
+
+      const userNickname = await userModel.getUserByNickname({ nickname });
+
+      if (userNickname) {
+        return '이미 존재하는 닉네임입니다.';
       }
 
       const checkedEmail = await userModel.getEmailVerificationByEmail({
@@ -130,12 +133,16 @@ module.exports = {
         return '인증되지 않은 이메일입니다.';
       }
 
-      // 서버 시간 & DB 시간 불일치로 보류
-      // const time = moment().diff(checkedEmail.created_at, 'minutes');
+      const currentTime = moment().format('YYYY-MM-DD hh:mm:ss');
 
-      // if (time > 60) {
-      //   return '인증 유효 시간이 만료되었습니다.';
-      // }
+      const diffTime = moment(currentTime).diff(
+        checkedEmail.created_at,
+        'minutes',
+      );
+
+      if (diffTime > 60) {
+        return '인증 유효 시간이 만료되었습니다.';
+      }
 
       const userSalt = await createSalt();
       const hashedPassword = await createHashedPassword(password, userSalt);

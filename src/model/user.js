@@ -129,7 +129,7 @@ module.exports = {
     let connection;
     try {
       const query = `
-            SELECT * 
+            SELECT email, verification_code, is_verified, DATE_FORMAT(created_at , '%Y-%m-%d %H:%i:%s') AS created_at 
             FROM email_verifications
             WHERE email = ${await db.getEscape(email)}
         `;
@@ -141,7 +141,7 @@ module.exports = {
     } catch (err) {
       logger.error('getUserByEmail model Error : ', err.stack);
       console.error('Error', err.message);
-      return err;
+      throw err;
     } finally {
       if (connection) {
         await db.releaseConnection(connection);
@@ -150,15 +150,18 @@ module.exports = {
   },
 
   // 이메일 인증번호 저장
-  saveVerificationNumber: async ({ email, randomNumber }) => {
+  saveVerificationNumber: async ({ email, code, issueTime }) => {
     let connection;
     try {
       const query = ` 
             INSERT INTO email_verifications
-            (email, verification_number, is_verified) 
-            VALUES ( ${await db.getEscape(email)}, ${await db.getEscape(
-              randomNumber,
-            )}, 0)
+            (email, verification_code, is_verified, created_at) 
+            VALUES ( 
+              ${await db.getEscape(email)}, 
+              ${await db.getEscape(code)}, 
+              0,
+              ${await db.getEscape(issueTime)}
+            )
         `;
       connection = await db.getConnection();
       const result = await connection.query(query);
