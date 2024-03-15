@@ -11,7 +11,6 @@ module.exports = {
 
       const recentlyMatchs = await matchModel.getRecentlyMatch(teamId, 5);
 
-      console.log(recentlyMatchs);
       return { team, recentlyMatchs };
     } catch (err) {
       console.error(err);
@@ -24,7 +23,10 @@ module.exports = {
     try {
       const clubList = await teamModel.getClubInfo();
       const premierLeagueList = await crawler.totalMatchesBySeason();
-      const result = await teamModel.updateClubPerformance(clubList,premierLeagueList);
+      const result = await teamModel.updateClubPerformance(
+        clubList,
+        premierLeagueList,
+      );
       return result;
     } catch (err) {
       console.error(err);

@@ -22,7 +22,7 @@ module.exports = {
       const user = await userModel.getUserByEmail({ email });
 
       if (user) {
-        return '이미 가입된 이메일입니다.';
+        return { resultData: '이미 가입된 이메일입니다.', code: '01' };
       }
 
       // 인증번호 발급
@@ -41,7 +41,7 @@ module.exports = {
 
       if (!sendResult) {
         // 인증메일 전송 실패
-        return '메일 전송에 실패하였습니다.';
+        throw new InternalServerError('메일 전송 실패');
       }
 
       // 인증번호 DB 저장
@@ -64,7 +64,7 @@ module.exports = {
         issueTime,
       });
 
-      return '메일 전송 성공';
+      return { resultData: '인증 메일이 전송되었습니다.', code: '02' };
     } catch (err) {
       console.error(err);
       logger.error('sendToEmail Service : ', err.stack);
@@ -72,21 +72,21 @@ module.exports = {
     }
   },
 
-  checkedVerificationNumber: async ({ email, code }) => {
+  checkedVerificationNumber: async ({ email, verificationCode }) => {
     try {
       const checkedVerfication = await userModel.getEmailVerificationByEmail({
         email,
       });
 
-      if (checkedVerfication.verification_code !== code) {
-        return '인증에 실패하였습니다';
+      if (checkedVerfication.verification_code !== verificationCode) {
+        return { resultData: '인증에 실패하였습니다', code: '01' };
       } else if (checkedVerfication.is_verified === 1) {
-        return '이미 인증된 이메일입니다.';
+        return { resultData: '이미 인증된 이메일입니다.', code: '02' };
       }
 
       await userModel.updateVerificationStatus({ email });
 
-      return '인증 성공하였습니다.';
+      return { resultData: '인증 성공하였습니다.', code: '03' };
     } catch (err) {
       console.error(err);
       logger.error('checkedVerticationNumber Service : ', err.stack);
@@ -116,13 +116,13 @@ module.exports = {
       const userEamil = await userModel.getUserByEmail({ email });
 
       if (userEamil) {
-        return '이미 가입된 이메일입니다.';
+        return { resultData: '이미 가입된 이메일입니다.', code: '01' };
       }
 
       const userNickname = await userModel.getUserByNickname({ nickname });
 
       if (userNickname) {
-        return '이미 존재하는 닉네임입니다.';
+        return { resultData: '이미 존재하는 닉네임입니다.', code: '02' };
       }
 
       const checkedEmail = await userModel.getEmailVerificationByEmail({
@@ -130,7 +130,7 @@ module.exports = {
       });
 
       if (checkedEmail.is_verified === 0) {
-        return '인증되지 않은 이메일입니다.';
+        return { resultData: '인증되지 않은 이메일입니다.', code: '03' };
       }
 
       const currentTime = moment().format('YYYY-MM-DD hh:mm:ss');
@@ -141,7 +141,7 @@ module.exports = {
       );
 
       if (diffTime > 60) {
-        return '인증 유효 시간이 만료되었습니다.';
+        return { resultData: '인증 유효 시간이 만료되었습니다.', code: '04' };
       }
 
       const userSalt = await createSalt();
@@ -159,7 +159,7 @@ module.exports = {
         throw new Error('회원가입에 실패하였습니다.');
       }
 
-      return '회원가입에 성공하였습니다.';
+      return { resultData: '회원가입에 성공하였습니다.', code: '05' };
     } catch (err) {
       console.error(err);
       logger.error('createUser Service Error : ', err.stack);

@@ -17,8 +17,10 @@ module.exports = {
   sendToVerificationEmail: async (req, res) => {
     try {
       const { email } = req.body;
-      const result = await userService.sendToVerificationEmail({ email });
-      resHandler.SuccessResponse(res, result, 200);
+      const { resultData, code } = await userService.sendToVerificationEmail({
+        email,
+      });
+      resHandler.SuccessResponse(res, resultData, 200, code);
     } catch (err) {
       console.error(err);
       resHandler.FailedResponse(res, err.stack, 500);
@@ -27,12 +29,12 @@ module.exports = {
 
   checkedVerificationNumber: async (req, res) => {
     try {
-      const { email, code } = req.body;
-      const result = await userService.checkedVerificationNumber({
+      const { email, verificationCode } = req.body;
+      const { resultData, code } = await userService.checkedVerificationNumber({
         email,
-        code,
+        verificationCode,
       });
-      resHandler.SuccessResponse(res, result, 200);
+      resHandler.SuccessResponse(res, resultData, 200, code);
     } catch (err) {
       console.error(err);
       resHandler.FailedResponse(res, err.stack, 500);
@@ -54,14 +56,14 @@ module.exports = {
     try {
       const { email, nickname, password, teamId } = req.body;
 
-      const result = await userService.createUser({
+      const { resultData, code } = await userService.createUser({
         email,
         nickname,
         password,
         teamId,
       });
 
-      resHandler.SuccessResponse(res, result, 200);
+      resHandler.SuccessResponse(res, resultData, 200, code);
     } catch (err) {
       console.error(err);
       resHandler.FailedResponse(res, err.stack, 500);
@@ -72,9 +74,13 @@ module.exports = {
     try {
       const { email, password, deviceToken } = req.body;
 
-      const result = await authService.login({ email, password, deviceToken });
+      const { resultData, code } = await authService.login({
+        email,
+        password,
+        deviceToken,
+      });
 
-      resHandler.SuccessResponse(res, result, 200);
+      resHandler.SuccessResponse(res, resultData, 200, code);
     } catch (err) {
       console.error(err);
       resHandler.FailedResponse(res, err.stack, 500);

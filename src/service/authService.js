@@ -15,15 +15,11 @@ module.exports = {
     try {
       const user = await userModel.getUserByEmail({ email });
 
-      if (!user) {
-        return '로그인에 실패하였습니다.';
-      }
-
       // 비밀번호 비교
       const verified = await verifyPassword(password, user.salt, user.password);
 
-      if (!verified) {
-        return '로그인에 실패하였습니다.';
+      if (!user || !verified) {
+        return { resultData: '로그인에 실패하였습니다.', code: '01' };
       }
 
       // 디바이스 토큰 저장
@@ -31,12 +27,13 @@ module.exports = {
 
       const accessToken = jwt.createAccessToken(user.email);
 
-      return {
+      const resultData = {
         email: user.email,
         nickname: user.nickname,
         teamId: user.club_id,
         accessToken,
       };
+      return { resultData, code: '02' };
     } catch (error) {
       console.log(error);
       throw new Error('Login failed');
