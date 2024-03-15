@@ -27,10 +27,10 @@ module.exports = {
 
   checkedVerificationNumber: async (req, res) => {
     try {
-      const { email, number } = req.body;
+      const { email, code } = req.body;
       const result = await userService.checkedVerificationNumber({
         email,
-        number,
+        code,
       });
       resHandler.SuccessResponse(res, result, 200);
     } catch (err) {
