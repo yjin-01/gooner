@@ -19,24 +19,29 @@ module.exports = {
       const verified = await verifyPassword(password, user.salt, user.password);
 
       if (!user || !verified) {
-        return { resultData: '로그인에 실패하였습니다.', code: '01' };
+        return { resultData: '로그인에 실패하였습니다.', code: 'err01' };
       }
 
       // 디바이스 토큰 저장
       await userModel.saveDeviceToken({ userId: user.user_id, deviceToken });
 
-      const accessToken = jwt.createAccessToken(user.email);
+      const accessToken = jwt.createAccessToken(user.user_id);
+
+      const refreshToken = jwt.createRefreshToken();
 
       const resultData = {
         email: user.email,
         nickname: user.nickname,
         teamId: user.club_id,
         accessToken,
+        refreshToken,
       };
-      return { resultData, code: '02' };
-    } catch (error) {
-      console.log(error);
-      throw new Error('Login failed');
+
+      return { resultData, code: 'suc01' };
+    } catch (err) {
+      console.error(err);
+      logger.error('login Service : ', err.stack);
+      throw err;
     }
   },
 
