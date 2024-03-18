@@ -13,7 +13,7 @@ Arsenal팀에 관한 정보, 경기 일정, 경기 결과 등을 확인 할 수 
 <br/>
 
 # 👩🏻‍💻 기능 구현
-- ### 공통 구현
+ - ### 공통 구현
   - Database
     - 정규화를 기반으로 한 ERD 모델링
   
@@ -67,6 +67,8 @@ Arsenal팀에 관한 정보, 경기 일정, 경기 결과 등을 확인 할 수 
 
 <br/>
 <br/>
+
+# 회고
 
 # 🔗 시스템 아키텍쳐
 <img wide="100%"  src ="https://github.com/yjin-01/gooner/blob/main/public/Gooner-back.png?raw=true">

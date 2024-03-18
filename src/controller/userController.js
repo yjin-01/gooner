@@ -1,5 +1,6 @@
 const authService = require('../service/authService');
 const userService = require('../service/userService');
+const pushSender = require('../util/push');
 const resHandler = require('../util/resHandler');
 
 module.exports = {
@@ -16,8 +17,10 @@ module.exports = {
   sendToVerificationEmail: async (req, res) => {
     try {
       const { email } = req.body;
-      const result = await userService.sendToVerificationEmail({ email });
-      resHandler.SuccessResponse(res, result, 200);
+      const { resultData, code } = await userService.sendToVerificationEmail({
+        email,
+      });
+      resHandler.SuccessResponse(res, resultData, 200, code);
     } catch (err) {
       console.error(err);
       resHandler.FailedResponse(res, err.stack, 500);
@@ -26,12 +29,12 @@ module.exports = {
 
   checkedVerificationNumber: async (req, res) => {
     try {
-      const { email, number } = req.body;
-      const result = await userService.checkedVerificationNumber({
+      const { email, verificationCode } = req.body;
+      const { resultData, code } = await userService.checkedVerificationNumber({
         email,
-        number,
+        verificationCode,
       });
-      resHandler.SuccessResponse(res, result, 200);
+      resHandler.SuccessResponse(res, resultData, 200, code);
     } catch (err) {
       console.error(err);
       resHandler.FailedResponse(res, err.stack, 500);
@@ -53,14 +56,14 @@ module.exports = {
     try {
       const { email, nickname, password, teamId } = req.body;
 
-      const result = await userService.createUser({
+      const { resultData, code } = await userService.createUser({
         email,
         nickname,
         password,
         teamId,
       });
 
-      resHandler.SuccessResponse(res, result, 200);
+      resHandler.SuccessResponse(res, resultData, 200, code);
     } catch (err) {
       console.error(err);
       resHandler.FailedResponse(res, err.stack, 500);
@@ -69,9 +72,40 @@ module.exports = {
 
   login: async (req, res) => {
     try {
-      const { email, password } = req.body;
+      const { email, password, deviceToken } = req.body;
 
-      const result = await authService.login({ email, password });
+      const { resultData, code } = await authService.login({
+        email,
+        password,
+        deviceToken,
+      });
+
+      resHandler.SuccessResponse(res, resultData, 200, code);
+    } catch (err) {
+      console.error(err);
+      resHandler.FailedResponse(res, err.stack, 500);
+    }
+  },
+
+  pushTest: async (req, res) => {
+    try {
+      // 특정기기에 전송
+      const { deviceToken } = req.body;
+
+      // 안드로이드
+      let pushOption = {
+        notification: {
+          title: '테스트 푸쉬 발송',
+          body: '보내지나요?',
+        },
+        data: {
+          title: '테스트 푸쉬 발송',
+          body: '보내지나요?',
+        },
+        token: deviceToken,
+      };
+
+      const result = await pushSender.sendToPush({ pushOption });
 
       resHandler.SuccessResponse(res, result, 200);
     } catch (err) {

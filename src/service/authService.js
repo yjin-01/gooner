@@ -11,24 +11,29 @@ const logger = require('../util/logger');
 const userModel = require('../model/user');
 
 module.exports = {
-  login: async ({ email, password }) => {
+  login: async ({ email, password, deviceToken }) => {
     try {
       const user = await userModel.getUserByEmail({ email });
-
-      if (!user) {
-        return '로그인에 실패하였습니다.';
-      }
 
       // 비밀번호 비교
       const verified = await verifyPassword(password, user.salt, user.password);
 
-      if (!verified) {
-        return '로그인에 실패하였습니다.';
+      if (!user || !verified) {
+        return { resultData: '로그인에 실패하였습니다.', code: '01' };
       }
+
+      // 디바이스 토큰 저장
+      await userModel.saveDeviceToken({ userId: user.user_id, deviceToken });
 
       const accessToken = jwt.createAccessToken(user.email);
 
-      return accessToken;
+      const resultData = {
+        email: user.email,
+        nickname: user.nickname,
+        teamId: user.club_id,
+        accessToken,
+      };
+      return { resultData, code: '02' };
     } catch (error) {
       console.log(error);
       throw new Error('Login failed');
