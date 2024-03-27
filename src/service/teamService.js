@@ -7,9 +7,9 @@ module.exports = {
   // 팀 정보 조회
   getOneTeam: async (teamId) => {
     try {
-      const team = await teamModel.getOneTeam(teamId);
+      const team = await teamModel.getOneTeamV2(teamId);
 
-      const recentlyMatchs = await matchModel.getRecentlyMatch(teamId, 5);
+      const recentlyMatchs = await matchModel.getRecentlyMatchV2(teamId, 5);
 
       return { team, recentlyMatchs };
     } catch (err) {

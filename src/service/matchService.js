@@ -81,7 +81,7 @@ module.exports = {
   // 예정 경기 조회
   getUpcomingMatch: async (teamId) => {
     try {
-      const matchList = await matchModel.getUpcomingMatch(teamId);
+      const matchList = await matchModel.getUpcomingMatchV2(teamId);
       return matchList;
     } catch (err) {
       console.error(err);
@@ -93,7 +93,7 @@ module.exports = {
   // 가장 최근 경기 결과 조회
   getRecentlyMatch: async (teamId) => {
     try {
-      const match = await matchModel.getRecentlyMatch(teamId, 1);
+      const match = await matchModel.getRecentlyMatchV2(teamId, 1);
 
       if (!match) {
         return {};
