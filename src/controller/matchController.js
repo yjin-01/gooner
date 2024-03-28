@@ -5,10 +5,10 @@ module.exports = {
   // 팀 정보 조회
   getMatchByTeamAndSeason: async (req, res) => {
     try {
-      const { teamId, season } = req.query;
+      const { teamId, seasonId } = req.query;
       const matchList = await matchService.getMatchByTeamAndSeason(
         teamId,
-        season,
+        seasonId,
       );
       resHandler.SuccessResponse(res, matchList, 200);
     } catch (err) {
@@ -44,9 +44,8 @@ module.exports = {
   },
 
   // 상대 전적 조회
-  checkRelationalPerformance : async (req,res) =>{
+  checkRelationalPerformance: async (req, res) => {
     try {
-      
       const relativeResult = await matchService.checkRelationalPerformance();
 
       resHandler.SuccessResponse(res, relativeResult, 200);
@@ -54,5 +53,5 @@ module.exports = {
       console.error(err);
       resHandler.FailedResponse(res, err.stack, 500);
     }
-  }
+  },
 };

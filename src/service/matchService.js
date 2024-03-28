@@ -3,15 +3,11 @@ const logger = require('../util/logger');
 
 module.exports = {
   // 팀 정보 조회
-  getMatchByTeamAndSeason: async (teamId, season) => {
+  getMatchByTeamAndSeason: async (teamId, seasonId) => {
     try {
-      const seasonStartDate = season.split('-')[0] + '-07-01';
-      const seasonEndDate = season.split('-')[1] + '-06-30';
-
-      const matchList = await matchModel.getMatchByTeamAndSeason(
+      const matchList = await matchModel.getMatchByTeamAndSeasonV2(
         teamId,
-        seasonStartDate,
-        seasonEndDate,
+        seasonId,
       );
       return matchList;
     } catch (err) {
@@ -95,7 +91,7 @@ module.exports = {
     try {
       const match = await matchModel.getRecentlyMatchV2(teamId, 1);
 
-      if (!match) {
+      if (match.length === 0) {
         return {};
       }
 

@@ -43,8 +43,8 @@ module.exports = {
 
     try {
       const query = `
-        SELECT sb.team_id, sb.name, sb.founded, sb.image_path, sb.short_code
-            , v.name 
+        SELECT sb.team_id, sb.name as team_name, sb.founded, sb.image_path, sb.short_code
+            , v.name as venue_name
         FROM (
             SELECT *
             FROM teams t 

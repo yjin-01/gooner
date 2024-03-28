@@ -43,6 +43,57 @@ module.exports = {
     }
   },
 
+  getMatchByTeamAndSeasonV2: async (teamId, seasonId) => {
+    let connection;
+
+    try {
+      const query =
+        `
+        SELECT sb.match_id
+            , t1.team_id as home_team_id
+            , t1.name as home_team_name
+            , t1.image_path as home_team_image
+            , t2.team_id as away_team_id
+            , t2.name as away_team_name
+            , t2.image_path as away_team_image
+            , sb.match_date
+            , sb.home_score
+            , sb.away_score
+            , sb.round
+            , sb.is_finished
+            , v.name as venue_name
+            , l.image_path as league_image
+        FROM(
+            SELECT *
+            FROM` +
+        '`match_v2`' +
+        `m 
+            WHERE m.season_by_league_id = ${seasonId}
+                AND (m.home_team_id = ${teamId} or m.away_team_id = ${teamId})
+        ) sb
+        LEFT JOIN teams t1 ON t1.team_id = sb.home_team_id
+        LEFT JOIN teams t2 ON t2.team_id = sb.away_team_id
+        LEFT JOIN venues v ON v.venue_id = sb.match_place
+        LEFT JOIN seasons_v2 s ON s.season_id = sb.season_by_league_id
+        LEFT JOIN leagues_v2 l ON l.league_id = s.league_id 
+      `;
+
+      connection = await db.getConnection();
+
+      const matchList = await connection.query(query);
+
+      return matchList[0];
+    } catch (err) {
+      logger.error('getMatchByTeamAndSeason Model Error : ', err.stack);
+      console.error('Error', err.message);
+      return err;
+    } finally {
+      if (connection) {
+        await db.releaseConnection(connection);
+      }
+    }
+  },
+
   // 상대 전적 조회
 
   checkRelativePerformance: async (opponentId) => {
@@ -149,7 +200,7 @@ module.exports = {
                   FROM` +
         '`match_v2`' +
         `m 
-            WHERE  (m.home_team_id = 2 OR m.away_team_id = ${teamId})
+            WHERE  (m.home_team_id = ${teamId} OR m.away_team_id = ${teamId})
               AND m.match_date >= NOW()
           ORDER BY match_date ASC
           LIMIT 5
