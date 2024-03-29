@@ -1,6 +1,7 @@
 const db = require('../loader/db');
 const logger = require('../util/logger');
 const teamQuery = require('../queries/teamQueries');
+
 module.exports = {
   // 팀 정보 조회
   getOneTeam: async (teamId) => {
