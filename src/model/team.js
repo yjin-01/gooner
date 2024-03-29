@@ -1,6 +1,7 @@
 const db = require('../loader/db');
 const logger = require('../util/logger');
-const teamQuery = require("../queries/teamQueries");
+const teamQuery = require('../queries/teamQueries');
+
 module.exports = {
   // 팀 정보 조회
   getOneTeam: async (teamId) => {
@@ -38,8 +39,38 @@ module.exports = {
     }
   },
 
+  getOneTeamV2: async (teamId) => {
+    let connection;
+
+    try {
+      const query = `
+        SELECT sb.team_id, sb.name as team_name, sb.founded, sb.image_path, sb.short_code
+            , v.name as venue_name
+        FROM (
+            SELECT *
+            FROM teams t 
+            WHERE t.team_id = ${teamId}
+        ) sb
+        LEFT JOIN venues v ON v.venue_id = sb.venue_id
+    `;
+
+      connection = await db.getConnection();
+      const team = await connection.query(query);
+
+      return team[0][0];
+    } catch (err) {
+      logger.error('getOneTeam Model Error : ', err.stack);
+      console.error('Error', err.message);
+      return err;
+    } finally {
+      if (connection) {
+        await db.releaseConnection(connection);
+      }
+    }
+  },
+
   // 클럽별 ID, 이름 조회
-  getClubInfo : async (teamId) =>{
+  getClubInfo: async (teamId) => {
     let connection;
     try {
       const query = `
@@ -64,16 +95,37 @@ module.exports = {
   },
 
   // 클럽별 총 성적 업데이트
-  updateClubPerformance : async (clubList) =>{
+  updateClubPerformance: async (clubList) => {
     let connection;
     try {
       const query = await teamQuery.updateClubPerformanceQuery(clubList);
       connection = await db.getConnection();
       const result = await connection.query(query);
       return result[0];
-
     } catch (err) {
       logger.error('updateClubPerformance Model Error : ', err.stack);
+      console.error('Error', err.message);
+      return err;
+    } finally {
+      if (connection) {
+        await db.releaseConnection(connection);
+      }
+    }
+  },
+  // 클럽별 총 경기 결과
+  getClubPerformance : async () =>{
+    let connection;
+    try {
+      const query = `
+        SELECT * FROM gooner.league_participating_clubs_by_season
+        ORDER BY ranking
+      `
+      connection = await db.getConnection();
+      const result = await connection.query(query);
+      return result[0];
+
+    } catch (err) {
+      logger.error('getClubPerformance Model Error : ', err.stack);
       console.error('Error', err.message);
       return err;
     } finally {
@@ -84,4 +136,3 @@ module.exports = {
   }
 
 };
-

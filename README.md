@@ -19,15 +19,15 @@ Arsenal팀에 관한 정보, 경기 일정, 경기 결과 등을 확인 할 수 
   
   - Swagger
 
--  ### 조회 API 구현
+  -  ### 조회 API 구현
     - 팀/선수 정보 관련 API
     - 경기 일정 관련 API
     - 경기 관련 API
  
-- ### User API 구현
+  - ### User API 구현
 
-- ### 채팅 구현
-  - socket.io를 이용한 socket통신 연결
+  - ### 채팅 구현
+    - socket.io를 이용한 socket통신 연결
  
 <br/>
 <br/>
@@ -68,7 +68,6 @@ Arsenal팀에 관한 정보, 경기 일정, 경기 결과 등을 확인 할 수 
 <br/>
 <br/>
 
-# 회고
 
 # 🔗 시스템 아키텍쳐
 <img wide="100%"  src ="https://github.com/yjin-01/gooner/blob/main/public/Gooner-back.png?raw=true">
