@@ -13,14 +13,14 @@ module.exports = {
     }
   },
 
-  getOnePlayer: async (teamId, playerId) => {
+  getOnePlayer: async ({ playerId }) => {
     try {
-      const player = await playerModel.getOnePlayer(teamId, playerId);
-      return player;
+      const player = await playerModel.getOnePlayerV2({ playerId });
+
+      return { resultData: player, code: 'suc01' };
     } catch (err) {
-      console.log(err);
       logger.error('getOnePlayer Service Error : ', err.stack);
-      return null;
+      throw err;
     }
   },
 
@@ -35,26 +35,29 @@ module.exports = {
     }
   },
 
-  getTeamPlayerByLeagueSeason: async (teamId, season) => {
+  getTeamPlayerByLeagueSeason: async ({
+    teamId,
+    seasonId,
+    positionId,
+    keyword,
+  }) => {
     try {
-      const leagueStartDate = season.split('-')[0] + '-07-01';
-      const leagueEndDate = season.split('-')[1] + '-06-30';
-
-      const teamPlayer = await playerModel.getTeamPlayerByLeagueSeason(
+      const teamPlayer = await playerModel.getTeamPlayerByLeagueSeasonV2({
         teamId,
-        leagueStartDate,
-        leagueEndDate,
-      );
-      return teamPlayer;
+        seasonId,
+        positionId,
+        keyword,
+      });
+
+      // throw err;
+
+      return { resultData: teamPlayer, code: 'suc01' };
     } catch (err) {
-      console.log(err);
       logger.error('getTeamPlayerByLeagueSeason Service Error : ', err.stack);
-      return null;
+      throw err;
     }
   },
 
   // 주목할 만한 선수
-  getNotablePlayer : async () =>{
-
-  }
+  getNotablePlayer: async () => {},
 };

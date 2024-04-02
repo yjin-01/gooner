@@ -16,13 +16,16 @@ module.exports = {
   // 선수 상세 조회
   getOnePlayer: async (req, res) => {
     try {
-      const { teamId, playerId } = req.query;
-      const player = await playerService.getOnePlayer(teamId, playerId);
+      const { playerId } = req.query;
 
-      if (!player)
+      const { resultData, code } = await playerService.getOnePlayer({
+        playerId,
+      });
+
+      if (!resultData)
         return resHandler.FailedResponse(res, 'Player were not found', 400);
 
-      resHandler.SuccessResponse(res, player, 200);
+      resHandler.SuccessResponse(res, resultData, 200, code);
     } catch (err) {
       console.error(err);
       resHandler.FailedResponse(res, err.stack, 500);
@@ -46,15 +49,18 @@ module.exports = {
   // 시즌별 선수단 조회
   getTeamPlayerByLeagueSeason: async (req, res) => {
     try {
-      const { teamId, season } = req.query;
+      const { teamId, seasonId, positionId, keyword } = req.query;
 
       // 시즌 기간에 해당하는 계약된 선수 조회
-      const players = await playerService.getTeamPlayerByLeagueSeason(
-        teamId,
-        season,
-      );
+      const { resultData, code } =
+        await playerService.getTeamPlayerByLeagueSeason({
+          teamId,
+          seasonId,
+          positionId,
+          keyword,
+        });
 
-      resHandler.SuccessResponse(res, players, 200);
+      resHandler.SuccessResponse(res, resultData, 200, code);
     } catch (err) {
       console.error(err);
       resHandler.FailedResponse(res, err.stack, 500);
