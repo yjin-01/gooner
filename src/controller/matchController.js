@@ -2,17 +2,17 @@ const resHandler = require('../util/resHandler');
 const matchService = require('../service/matchService');
 
 module.exports = {
-  // 팀 정보 조회
+  // 팀 시즌 경기 정보 조회
   getMatchByTeamAndSeason: async (req, res) => {
     try {
       const { teamId, seasonId } = req.query;
-      const matchList = await matchService.getMatchByTeamAndSeason(
+      
+      const { resultData, code } = await matchService.getMatchByTeamAndSeason({
         teamId,
         seasonId,
-      );
-      resHandler.SuccessResponse(res, matchList, 200);
+      });
+      resHandler.SuccessResponse(res, resultData, 200, code);
     } catch (err) {
-      console.error(err);
       resHandler.FailedResponse(res, err.stack, 500);
     }
   },
@@ -21,8 +21,11 @@ module.exports = {
   getUpcomingMatch: async (req, res) => {
     try {
       const { teamId } = req.query;
-      const matchList = await matchService.getUpcomingMatch(teamId);
-      resHandler.SuccessResponse(res, matchList, 200);
+      const { resultData, code } = await matchService.getUpcomingMatch({
+        teamId,
+      });
+
+      resHandler.SuccessResponse(res, resultData, 200, code);
     } catch (err) {
       console.error(err);
       resHandler.FailedResponse(res, err.stack, 500);
@@ -34,9 +37,11 @@ module.exports = {
     try {
       const { teamId } = req.query;
       // 경기 결과 조회
-      const match = await matchService.getRecentlyMatch(teamId);
+      const { resultData, code } = await matchService.getRecentlyMatch({
+        teamId,
+      });
 
-      resHandler.SuccessResponse(res, match, 200);
+      resHandler.SuccessResponse(res, resultData, 200, code);
     } catch (err) {
       console.error(err);
       resHandler.FailedResponse(res, err.stack, 500);

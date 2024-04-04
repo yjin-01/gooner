@@ -1,9 +1,9 @@
 module.exports = {
-  SuccessResponse: (res, resultData, statusCode, code = '01') => {
+  SuccessResponse: (res, resultData, statusCode, code = 'suc01') => {
     return res.status(statusCode).send({ result: resultData, code });
   },
 
   FailedResponse: (res, ErrorMessage, statusCode) => {
-    return res.status(statusCode).send({ Error: ErrorMessage });
+    return res.status(statusCode).send({ error: ErrorMessage });
   },
 };

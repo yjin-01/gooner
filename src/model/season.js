@@ -62,4 +62,74 @@ module.exports = {
       }
     }
   },
+
+  getAllSeasonByTeamIdV2: async ({ teamId }) => {
+    let connection;
+
+    try {
+      const query = `
+          SELECT s2.season_id, s2.name AS season
+            FROM(
+              SELECT *
+              FROM standing s 
+              WHERE participant_id = ${teamId}
+            ) sb
+          LEFT JOIN seasons_v2 s2 on s2.season_id  = sb.season_id
+          ORDER BY s2.season_id ASC
+      `;
+
+      connection = await db.getConnection();
+
+      const season = await connection.query(query);
+
+      return season[0];
+    } catch (err) {
+      logger.error('getAllSeasonByTeamId Model Error : ', err.stack);
+      console.error('Error', err.message);
+      throw err;
+    } finally {
+      if (connection) {
+        await db.releaseConnection(connection);
+      }
+    }
+  },
+
+  // 팀의 현재 진행중인 리그시즌 조회
+  getCurrentLeagueSeasonByTeamId: async ({ teamId }) => {
+    let connection;
+
+    try {
+      const query = `
+          SELECT l.league_id
+                , l.name as league_name
+                , l.short_code
+                , l.image_path as league_image
+                , sb.season_id
+                , sb.name AS season
+                , s2.participant_id as team_id
+            FROM(
+              SELECT *
+              FROM seasons_v2 s 
+              WHERE is_current = 1
+            ) sb
+          LEFT JOIN leagues_v2 l on l.league_id = sb.league_id
+          INNER JOIN standing s2 on s2.season_id = sb.season_id 
+            AND s2.participant_id = ${teamId}
+      `;
+
+      connection = await db.getConnection();
+
+      const season = await connection.query(query);
+
+      return season[0];
+    } catch (err) {
+      logger.error('getAllSeasonByTeamId Model Error : ', err.stack);
+      console.error('Error', err.message);
+      throw err;
+    } finally {
+      if (connection) {
+        await db.releaseConnection(connection);
+      }
+    }
+  },
 };

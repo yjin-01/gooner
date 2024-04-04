@@ -1,6 +1,7 @@
 const db = require('../loader/db');
 const logger = require('../util/logger');
 const teamQuery = require('../queries/teamQueries');
+
 module.exports = {
   // 팀 정보 조회
   getOneTeam: async (teamId) => {
@@ -38,7 +39,7 @@ module.exports = {
     }
   },
 
-  getOneTeamV2: async (teamId) => {
+  getOneTeamV2: async ({ teamId }) => {
     let connection;
 
     try {
@@ -54,6 +55,7 @@ module.exports = {
     `;
 
       connection = await db.getConnection();
+      
       const team = await connection.query(query);
 
       return team[0][0];
@@ -112,13 +114,15 @@ module.exports = {
     }
   },
   // 클럽별 총 경기 결과
-  getClubPerformance : async () =>{
+  getClubPerformance: async () => {
+
     let connection;
     try {
       const query = `
         SELECT * FROM gooner.league_participating_clubs_by_season
         ORDER BY ranking
-      `
+      `;
+      
       connection = await db.getConnection();
       const result = await connection.query(query);
       return result[0];
@@ -132,6 +136,6 @@ module.exports = {
         await db.releaseConnection(connection);
       }
     }
-  }
+  },
 
 };

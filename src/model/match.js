@@ -43,39 +43,36 @@ module.exports = {
     }
   },
 
-  getMatchByTeamAndSeasonV2: async (teamId, seasonId) => {
+  getMatchByTeamAndSeasonV2: async ({ teamId, seasonId }) => {
     let connection;
 
     try {
-      const query =
-        `
-        SELECT sb.match_id
-            , t1.team_id as home_team_id
-            , t1.name as home_team_name
-            , t1.image_path as home_team_image
-            , t2.team_id as away_team_id
-            , t2.name as away_team_name
-            , t2.image_path as away_team_image
-            , sb.match_date
-            , sb.home_score
-            , sb.away_score
-            , sb.round
-            , sb.is_finished
-            , v.name as venue_name
-            , l.image_path as league_image
-        FROM(
-            SELECT *
-            FROM` +
-        '`match_v2`' +
-        `m 
-            WHERE m.season_by_league_id = ${seasonId}
-                AND (m.home_team_id = ${teamId} or m.away_team_id = ${teamId})
-        ) sb
-        LEFT JOIN teams t1 ON t1.team_id = sb.home_team_id
-        LEFT JOIN teams t2 ON t2.team_id = sb.away_team_id
-        LEFT JOIN venues v ON v.venue_id = sb.match_place
-        LEFT JOIN seasons_v2 s ON s.season_id = sb.season_by_league_id
-        LEFT JOIN leagues_v2 l ON l.league_id = s.league_id 
+      const query = `
+            SELECT sb.match_id
+                , t1.team_id as home_team_id
+                , t1.name as home_team_name
+                , t1.image_path as home_team_image
+                , t2.team_id as away_team_id
+                , t2.name as away_team_name
+                , t2.image_path as away_team_image
+                , sb.match_date
+                , sb.home_score
+                , sb.away_score
+                , sb.round
+                , sb.is_finished
+                , v.name as venue_name
+                , l.image_path as league_image
+            FROM(
+                SELECT *
+                FROM match_v2 m 
+                WHERE m.season_by_league_id = ${seasonId}
+                    AND (m.home_team_id = ${teamId} or m.away_team_id = ${teamId})
+            ) sb
+            LEFT JOIN teams t1 ON t1.team_id = sb.home_team_id
+            LEFT JOIN teams t2 ON t2.team_id = sb.away_team_id
+            LEFT JOIN venues v ON v.venue_id = sb.match_place
+            LEFT JOIN seasons_v2 s ON s.season_id = sb.season_by_league_id
+            LEFT JOIN leagues_v2 l ON l.league_id = s.league_id 
       `;
 
       connection = await db.getConnection();
@@ -178,38 +175,36 @@ module.exports = {
     }
   },
 
-  getUpcomingMatchV2: async (teamId) => {
+  getUpcomingMatchV2: async ({ teamId }) => {
     let connection;
 
     try {
-      const query =
-        `
-            SELECT sb.match_id
-                 , t1.team_id as home_team_id
-                 , t1.name as home_team_name
-                 , t1.short_code as home_team_nickname
-                 , t1.image_path as home_team_image
-                 , t2.team_id as away_team_id
-                 , t2.name as away_team_name
-                 , t2.short_code as away_team_nickname
-                 , t2.image_path as away_team_image
-                 , sb.match_date
-                 , v.name as venue_name
-                 , l.image_path as league_image
-            FROM (SELECT *
-                  FROM` +
-        '`match_v2`' +
-        `m 
-            WHERE  (m.home_team_id = ${teamId} OR m.away_team_id = ${teamId})
-              AND m.match_date >= NOW()
-          ORDER BY match_date ASC
-          LIMIT 5
-      ) sb
-      LEFT JOIN teams t1 ON t1.team_id = sb.home_team_id #and c1.club_id = sb.away_team_id
-      LEFT JOIN teams t2 ON t2.team_id = sb.away_team_id
-      LEFT JOIN venues v ON v.venue_id = sb.match_place
-      LEFT JOIN seasons_v2 s ON s.season_id = sb.season_by_league_id
-      LEFT JOIN leagues_v2 l ON l.league_id = s.league_id 
+      const query = `
+          SELECT sb.match_id
+                , t1.team_id as home_team_id
+                , t1.name as home_team_name
+                , t1.short_code as home_team_nickname
+                , t1.image_path as home_team_image
+                , t2.team_id as away_team_id
+                , t2.name as away_team_name
+                , t2.short_code as away_team_nickname
+                , t2.image_path as away_team_image
+                , sb.match_date
+                , v.name as venue_name
+                , l.image_path as league_image
+          FROM (
+              SELECT *
+              FROM match_v2 m 
+              WHERE  (m.home_team_id = ${teamId} OR m.away_team_id = ${teamId})
+                AND m.match_date >= NOW()
+              ORDER BY match_date ASC
+              LIMIT 5
+          ) sb
+          LEFT JOIN teams t1 ON t1.team_id = sb.home_team_id 
+          LEFT JOIN teams t2 ON t2.team_id = sb.away_team_id
+          LEFT JOIN venues v ON v.venue_id = sb.match_place
+          LEFT JOIN seasons_v2 s ON s.season_id = sb.season_by_league_id
+          LEFT JOIN leagues_v2 l ON l.league_id = s.league_id 
       `;
 
       connection = await db.getConnection();
@@ -281,12 +276,11 @@ module.exports = {
     }
   },
 
-  getRecentlyMatchV2: async (teamId, count) => {
+  getRecentlyMatchV2: async ({ teamId, count }) => {
     let connection;
 
     try {
-      const query =
-        `
+      const query = `
             SELECT sb.match_id
                  , t1.team_id as home_team_id
                  , t1.name as home_team_name
@@ -303,20 +297,19 @@ module.exports = {
                  , sb.is_finished
                  , v.name as venue_name
                  , l.image_path as league_image
-            FROM (SELECT *
-                  FROM` +
-        '`match_v2`' +
-        `m 
-              WHERE ( m.home_team_id = ${teamId} OR m.away_team_id = ${teamId} )
-                AND m.is_finished = 1
-            ORDER BY match_date DESC
-            LIMIT ${count}
-        ) sb
-        LEFT JOIN teams t1 ON t1.team_id = sb.home_team_id #and c1.club_id = sb.away_team_id
-        LEFT JOIN teams t2 ON t2.team_id = sb.away_team_id
-        LEFT JOIN venues v ON v.venue_id = sb.match_place
-        LEFT JOIN seasons_v2 s ON s.season_id = sb.season_by_league_id
-        LEFT JOIN leagues_v2 l ON l.league_id = s.league_id 
+            FROM (
+                SELECT *
+                FROM match_v2 m 
+                WHERE ( m.home_team_id = ${teamId} OR m.away_team_id = ${teamId} )
+                  AND m.is_finished = 1
+                ORDER BY match_date DESC
+                LIMIT ${count}
+            ) sb
+            LEFT JOIN teams t1 ON t1.team_id = sb.home_team_id 
+            LEFT JOIN teams t2 ON t2.team_id = sb.away_team_id
+            LEFT JOIN venues v ON v.venue_id = sb.match_place
+            LEFT JOIN seasons_v2 s ON s.season_id = sb.season_by_league_id
+            LEFT JOIN leagues_v2 l ON l.league_id = s.league_id 
         `;
 
       connection = await db.getConnection();
@@ -334,15 +327,23 @@ module.exports = {
     }
   },
 
-  // 경기 상세 결과 조회(골 득점 정보)
-  getMatchDetailByMatchId: async (matchId) => {
+  // 경기 상세 결과 조회(골 득점 및 경고 등)
+  getMatchDetailByMatchId: async ({ matchId }) => {
     let connection;
 
     try {
       const query = `
-          SELECT *
-          FROM match_details md
-          WHERE md.match_id = ${matchId}
+        SELECT sb.*
+              , p1.name as player_name
+              , p2.name as related_player_name
+        FROM (
+            SELECT *
+            FROM match_details md
+            WHERE md.match_id = ${matchId}
+        )sb
+        LEFT JOIN players p1 ON p1.player_id = sb.player_id
+        LEFT JOIN players p2 ON p2.player_id = sb.related_player_id
+        ORDER BY match_detail_id ASC
       `;
 
       connection = await db.getConnection();
