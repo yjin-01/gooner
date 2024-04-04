@@ -63,7 +63,7 @@ module.exports = {
     }
   },
 
-  getAllSeasonByTeamIdV2: async (teamId) => {
+  getAllSeasonByTeamIdV2: async ({ teamId }) => {
     let connection;
 
     try {
@@ -75,6 +75,7 @@ module.exports = {
               WHERE participant_id = ${teamId}
             ) sb
           LEFT JOIN seasons_v2 s2 on s2.season_id  = sb.season_id
+          ORDER BY s2.season_id ASC
       `;
 
       connection = await db.getConnection();
@@ -85,7 +86,7 @@ module.exports = {
     } catch (err) {
       logger.error('getAllSeasonByTeamId Model Error : ', err.stack);
       console.error('Error', err.message);
-      return err;
+      throw err;
     } finally {
       if (connection) {
         await db.releaseConnection(connection);
@@ -124,7 +125,7 @@ module.exports = {
     } catch (err) {
       logger.error('getAllSeasonByTeamId Model Error : ', err.stack);
       console.error('Error', err.message);
-      return err;
+      throw err;
     } finally {
       if (connection) {
         await db.releaseConnection(connection);
