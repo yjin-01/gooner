@@ -15,6 +15,7 @@ module.exports = {
       }
 
       return { resultData: matchList, code: 'suc01' };
+
     } catch (err) {
       logger.error('getMatchByTeamAndSeason Service Error : ', err.stack);
       throw err;
@@ -88,6 +89,7 @@ module.exports = {
       }
 
       return { resultData: matchList, code: 'suc01' };
+      
     } catch (err) {
       logger.error('getUpcomingMatch Service Error : ', err.stack);
       return null;
@@ -97,6 +99,7 @@ module.exports = {
   // 가장 최근 경기 결과 조회
   getRecentlyMatch: async ({ teamId }) => {
     try {
+
       const match = await matchModel.getRecentlyMatchV2({ teamId, count: 1 });
 
       if (match.length === 0) {

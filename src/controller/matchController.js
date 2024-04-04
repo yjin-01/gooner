@@ -6,6 +6,7 @@ module.exports = {
   getMatchByTeamAndSeason: async (req, res) => {
     try {
       const { teamId, seasonId } = req.query;
+      
       const { resultData, code } = await matchService.getMatchByTeamAndSeason({
         teamId,
         seasonId,

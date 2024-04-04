@@ -7,6 +7,7 @@ module.exports = {
   // 팀 정보 조회
   getOneTeam: async ({ teamId }) => {
     try {
+
       const team = await teamModel.getOneTeamV2({ teamId });
 
       if (!team) {
