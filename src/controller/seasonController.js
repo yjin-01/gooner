@@ -31,4 +31,21 @@ module.exports = {
       resHandler.FailedResponse(res, err.stack, 500);
     }
   },
+
+  // 팀이 참가중인 리그 순위 조회
+  getSeasonRank: async (req, res) => {
+    try {
+      const { teamId, seasonId } = req.query;
+
+      const { resultData, code } = await seasonService.getSeasonRank({
+        teamId,
+        seasonId,
+      });
+
+      resHandler.SuccessResponse(res, resultData, 200, code);
+    } catch (err) {
+      console.error(err);
+      resHandler.FailedResponse(res, err.stack, 500);
+    }
+  },
 };
