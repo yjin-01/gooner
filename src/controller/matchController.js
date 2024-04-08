@@ -6,7 +6,7 @@ module.exports = {
   getMatchByTeamAndSeason: async (req, res) => {
     try {
       const { teamId, seasonId } = req.query;
-      
+
       const { resultData, code } = await matchService.getMatchByTeamAndSeason({
         teamId,
         seasonId,
@@ -54,6 +54,22 @@ module.exports = {
       const relativeResult = await matchService.checkRelationalPerformance();
 
       resHandler.SuccessResponse(res, relativeResult, 200);
+    } catch (err) {
+      console.error(err);
+      resHandler.FailedResponse(res, err.stack, 500);
+    }
+  },
+
+  // 경기 조회
+  getMatch: async (req, res) => {
+    try {
+      const { matchId } = req.params;
+      // 경기 결과 조회
+      const { resultData, code } = await matchService.getMatch({
+        matchId,
+      });
+
+      resHandler.SuccessResponse(res, resultData, 200, code);
     } catch (err) {
       console.error(err);
       resHandler.FailedResponse(res, err.stack, 500);
