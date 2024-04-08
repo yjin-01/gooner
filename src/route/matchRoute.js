@@ -4,9 +4,10 @@ const {
   getUpcomingMatch,
   getRecentlyMatch,
   checkRelationalPerformance,
+  getMatch,
 } = require('../controller/matchController');
 const { validatorErrorCheck } = require('../middleware/validator');
-const { query } = require('express-validator');
+const { query, param } = require('express-validator');
 
 const matchRouter = Router();
 
@@ -33,6 +34,16 @@ matchRouter.get(
   '/team/recently',
   [query('teamId', 'Bad Request').notEmpty().isNumeric(), validatorErrorCheck],
   getRecentlyMatch,
+);
+
+// 경기 조회
+matchRouter.get(
+  '/:matchId',
+  [
+    (param('matchId', 'Bad Request').notEmpty().isNumeric(),
+    validatorErrorCheck),
+  ],
+  getMatch,
 );
 
 // 상대 전적 조회
