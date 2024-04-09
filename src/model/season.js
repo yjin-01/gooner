@@ -141,6 +141,9 @@ module.exports = {
           SELECT sb.standing_id
                 , sb.position
                 , sb.points
+                , sb.win
+                , sb.loss
+                , sb.draw
                 , t.team_id
                 , t.name as team_name
                 , t.short_code
