@@ -121,9 +121,44 @@ module.exports = {
     }
   },
 
-  // 라인업 - 1시간전
+  // 라인업 조회
+  getMatchLineUp: async ({ matchId }) => {
+    let connection;
 
-  getTeamLineUp: async () => {},
+    try {
+      const query = `
+          SELECT sb.lineup_id
+                , sb.match_id
+                , sb.player_id
+                , sb.team_id
+                , sb.player_name
+                , sb.jersey_number
+                , sb.position_id
+                , p.category
+                , p.initial
+
+          FROM (
+              SELECT *
+              FROM lineups l
+              WHERE l.match_id = ${matchId}
+          ) sb
+          LEFT JOIN positions_v2 p ON p.position_id = sb.position_id
+      `;
+
+      connection = await db.getConnection();
+
+      const lineUp = await connection.query(query);
+
+      return lineUp[0];
+    } catch (err) {
+      logger.error('getMatchLineUp Model Error : ', err.stack);
+      console.error('Error', err.message);
+    } finally {
+      if (connection) {
+        await db.releaseConnection(connection);
+      }
+    }
+  },
 
   // 예정 경기 조회
   getUpcomingMatch: async (teamId) => {
@@ -410,6 +445,51 @@ module.exports = {
     }
   },
 
+  // 전적 조회
+  getTeamPerformance: async ({ teamId, opponentId }) => {
+    let connection;
+
+    try {
+      const query = `
+              SELECT sb.*, count(result) as count
+              FROM (
+                SELECT CASE
+                    WHEN m.home_team_id = ${teamId} THEN
+                      CASE
+                        WHEN  m.match_result = 'HOME' THEN 'WIN'
+                        WHEN  m.match_result = 'AWAY' THEN 'LOSE'
+                        ELSE 'DRAW'
+                      END
+                    WHEN m.away_team_id = ${teamId} THEN
+                      CASE
+                        WHEN  m.match_result = 'HOME' THEN 'LOSE'
+                        WHEN  m.match_result = 'AWAY' THEN 'WIN'
+                        ELSE 'DRAW'
+                      END
+                  END AS result	
+                FROM match_v2 m 
+                WHERE (m.home_team_id = ${teamId} OR m.home_team_id = ${opponentId})
+                  AND (m.away_team_id = ${teamId} OR m.away_team_id = ${opponentId})
+                  AND m.is_finished = 1
+              )sb
+              GROUP BY sb.result              
+          `;
+
+      connection = await db.getConnection();
+
+      const performance = await connection.query(query);
+
+      return performance[0];
+    } catch (err) {
+      logger.error('getTeamPerformance Model Error : ', err.stack);
+      console.error('Error', err.message);
+    } finally {
+      if (connection) {
+        await db.releaseConnection(connection);
+      }
+    }
+  },
+
   // 경기 결과 조회
   updateMatchResult: async () => {
     let connection;
@@ -438,28 +518,43 @@ module.exports = {
     }
   },
 
-  // 아직 진행되지 않은 아스날과 경기할 상대팀 조회 (최신 1개)
-
-  getOneUpcomingOpponent: async () => {
+  // 주목할만한 선수 조회
+  getTeamPerformance: async ({ teamId, opponentId }) => {
     let connection;
 
     try {
       const query = `
-          SELECT  match_id,if(away_team_id = 2,home_team_id,away_team_id) AS opponent 
-          FROM gooner.match
-          WHERE 1 = 1
-            AND is_finished = 0
-            AND (away_team_id = 2 OR home_team_id = 2)
-            LIMIT 1
-        `;
+                SELECT sb.*, count(result) as count
+                FROM (
+                  SELECT CASE
+                      WHEN m.home_team_id = ${teamId} THEN
+                        CASE
+                          WHEN  m.match_result = 'HOME' THEN 'WIN'
+                          WHEN  m.match_result = 'AWAY' THEN 'LOSE'
+                          ELSE 'DRAW'
+                        END
+                      WHEN m.away_team_id = ${teamId} THEN
+                        CASE
+                          WHEN  m.match_result = 'HOME' THEN 'LOSE'
+                          WHEN  m.match_result = 'AWAY' THEN 'WIN'
+                          ELSE 'DRAW'
+                        END
+                    END AS result	
+                  FROM match_v2 m 
+                  WHERE (m.home_team_id = ${teamId} OR m.home_team_id = ${opponentId})
+                    AND (m.away_team_id = ${teamId} OR m.away_team_id = ${opponentId})
+                    AND m.is_finished = 1
+                )sb
+                GROUP BY sb.result              
+            `;
 
       connection = await db.getConnection();
 
-      const opponentData = await connection.query(query);
+      const performance = await connection.query(query);
 
-      return opponentData[0][0];
+      return performance[0];
     } catch (err) {
-      logger.error('getOneUpcomingOpponent Model Error : ', err.stack);
+      logger.error('getTeamPerformance Model Error : ', err.stack);
       console.error('Error', err.message);
     } finally {
       if (connection) {
