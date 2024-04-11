@@ -13,9 +13,23 @@ module.exports = {
     }
   },
 
-  getOnePlayer: async ({ playerId }) => {
+  getOnePlayer: async ({ teamId, playerId }) => {
     try {
+      // 선수 정보 조회
       const player = await playerModel.getOnePlayerV2({ playerId });
+
+      // 선수 최신 등번호 조회
+      const jerseyNumber = await playerModel.getPlayerJerseyNumber({
+        teamId,
+        playerId,
+      });
+
+      // squads 테이블에 정보가 없는 경우
+      if (!jerseyNumber) {
+        player.jersey_number = null;
+      } else {
+        player.jersey_number = jerseyNumber.jersey_number;
+      }
 
       return { resultData: player, code: 'suc01' };
     } catch (err) {

@@ -16,9 +16,10 @@ module.exports = {
   // 선수 상세 조회
   getOnePlayer: async (req, res) => {
     try {
-      const { playerId } = req.query;
+      const { teamId, playerId } = req.query;
 
       const { resultData, code } = await playerService.getOnePlayer({
+        teamId,
         playerId,
       });
 

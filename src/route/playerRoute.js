@@ -12,6 +12,7 @@ playerRouter.get(
   '/detail',
   [
     query('playerId', 'Bad Request').notEmpty().isNumeric(),
+    query('teamId', 'Bad Request').notEmpty().isNumeric(),
     validatorErrorCheck,
   ],
   playerController.getOnePlayer,
