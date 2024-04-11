@@ -32,20 +32,6 @@ module.exports = {
     }
   },
 
-  // 현재 계약되어 있는 선수단 조회
-  getTeamPlayer: async (req, res) => {
-    try {
-      const { teamId } = req.query;
-
-      const players = await playerService.getTeamPlayer(teamId);
-
-      resHandler.SuccessResponse(res, players, 200);
-    } catch (err) {
-      console.error(err);
-      resHandler.FailedResponse(res, err.stack, 500);
-    }
-  },
-
   // 시즌별 선수단 조회
   getTeamPlayerByLeagueSeason: async (req, res) => {
     try {

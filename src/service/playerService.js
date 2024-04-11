@@ -24,17 +24,6 @@ module.exports = {
     }
   },
 
-  getTeamPlayer: async (teamId) => {
-    try {
-      const teamPlayer = await playerModel.getTeamPlayer(teamId);
-      return teamPlayer;
-    } catch (err) {
-      console.log(err);
-      logger.error('getTeamPlayer Service Error : ', err.stack);
-      return null;
-    }
-  },
-
   getTeamPlayerByLeagueSeason: async ({
     teamId,
     seasonId,

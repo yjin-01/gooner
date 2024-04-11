@@ -43,7 +43,7 @@ module.exports = {
             FROM league_participating_clubs_by_season lpcbs 
             WHERE club_id = ${teamId}
             ) sb
-          LEFT JOIN season_by_leagues sbl on sbl.season_by_league_id  = sb.season_by_league_id
+          LEFT JOIN season_by_leagues sbl on sbl.season_id  = sb.season_id
           GROUP BY sbl.league_season 
       `;
 

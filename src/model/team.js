@@ -44,7 +44,11 @@ module.exports = {
 
     try {
       const query = `
-        SELECT sb.team_id, sb.name as team_name, sb.founded, sb.image_path, sb.short_code
+        SELECT sb.team_id
+            , sb.name as team_name
+            , sb.founded
+            , sb.image_path as team_image
+            , sb.short_code
             , v.name as venue_name
         FROM (
             SELECT *
@@ -55,7 +59,7 @@ module.exports = {
     `;
 
       connection = await db.getConnection();
-      
+
       const team = await connection.query(query);
 
       return team[0][0];
@@ -115,18 +119,16 @@ module.exports = {
   },
   // 클럽별 총 경기 결과
   getClubPerformance: async () => {
-
     let connection;
     try {
       const query = `
         SELECT * FROM gooner.league_participating_clubs_by_season
         ORDER BY ranking
       `;
-      
+
       connection = await db.getConnection();
       const result = await connection.query(query);
       return result[0];
-
     } catch (err) {
       logger.error('getClubPerformance Model Error : ', err.stack);
       console.error('Error', err.message);
@@ -137,5 +139,4 @@ module.exports = {
       }
     }
   },
-
 };

@@ -17,9 +17,6 @@ playerRouter.get(
   playerController.getOnePlayer,
 );
 
-// 팀의 현재 선수단 조회
-playerRouter.get('/team', playerController.getTeamPlayer);
-
 // 시즌별 팀의 선수단 조회
 playerRouter.get(
   '/team/season',

@@ -1,4 +1,5 @@
 const matchModel = require('../model/match');
+const playerModel = require('../model/player');
 const logger = require('../util/logger');
 
 module.exports = {
@@ -133,7 +134,35 @@ module.exports = {
 
       return { resultData, code: 'suc01' };
     } catch (err) {
-      logger.error('getRecentlyMatch Service Error : ', err.stack);
+      logger.error('getMatch Service Error : ', err.stack);
+      throw err;
+    }
+  },
+
+  // 경기관련 정보 조회
+  getMatchInformation: async ({ matchId, seasonId, teamId, opponentId }) => {
+    try {
+      // 1. 라인업 조회
+      const lineUp = await matchModel.getMatchLineUp({ matchId });
+
+      // 2. 주목할만한 선수 조회
+      const notablePlayer = await matchModel.getNotablePlayer({
+        seasonId,
+        teamId,
+        opponentId,
+      });
+
+      // 3. 상대 전적
+      const performance = await matchModel.getTeamPerformance({
+        teamId,
+        opponentId,
+      });
+
+      const resultData = { lineUp, notablePlayer, performance };
+
+      return { resultData, code: 'suc01' };
+    } catch (err) {
+      logger.error('getMatchInformation Service Error : ', err.stack);
       throw err;
     }
   },
