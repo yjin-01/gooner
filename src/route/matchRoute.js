@@ -17,6 +17,7 @@ matchRouter.get(
   '/information',
   [
     query('matchId', 'Bad Request').notEmpty().isNumeric(),
+    query('seasonId', 'Bad Request').notEmpty().isNumeric(),
     query('teamId', 'Bad Request').notEmpty().isNumeric(),
     query('opponentId', 'Bad Request').notEmpty().isNumeric(),
     validatorErrorCheck,

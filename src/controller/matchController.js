@@ -79,10 +79,11 @@ module.exports = {
   // 경기 조회
   getMatchInformation: async (req, res) => {
     try {
-      const { matchId, teamId, opponentId } = req.query;
+      const { matchId, seasonId, teamId, opponentId } = req.query;
       // 경기 결과 조회
       const { resultData, code } = await matchService.getMatchInformation({
         matchId,
+        seasonId,
         teamId,
         opponentId,
       });

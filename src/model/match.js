@@ -23,7 +23,7 @@ module.exports = {
         LEFT JOIN clubs c1 ON c1.club_id = sb.home_team_id #and c1.club_id = sb.away_team_id
         LEFT JOIN clubs c2 ON c2.club_id = sb.away_team_id
         LEFT JOIN stadiums s ON s.stadium_id = sb.match_place
-        LEFT JOIN season_by_leagues sbl ON sbl.season_by_league_id = sb.season_by_league_id
+        LEFT JOIN season_by_leagues sbl ON sbl.season_id = sb.season_id
         LEFT JOIN leagues l ON l.league_id = sbl.league_id 
       `;
 
@@ -65,13 +65,13 @@ module.exports = {
             FROM(
                 SELECT *
                 FROM match_v2 m 
-                WHERE m.season_by_league_id = ${seasonId}
+                WHERE m.season_id = ${seasonId}
                     AND (m.home_team_id = ${teamId} or m.away_team_id = ${teamId})
             ) sb
             LEFT JOIN teams t1 ON t1.team_id = sb.home_team_id
             LEFT JOIN teams t2 ON t2.team_id = sb.away_team_id
             LEFT JOIN venues v ON v.venue_id = sb.match_place
-            LEFT JOIN seasons_v2 s ON s.season_id = sb.season_by_league_id
+            LEFT JOIN seasons_v2 s ON s.season_id = sb.season_id
             LEFT JOIN leagues_v2 l ON l.league_id = s.league_id 
       `;
 
@@ -133,10 +133,11 @@ module.exports = {
                 , sb.team_id
                 , sb.player_name
                 , sb.jersey_number
+                , sb.formation_field
+                , sb.formation_position
                 , sb.position_id
-                , p.category
-                , p.initial
-
+                , p.category as position_category
+                , p.initial as position_initial
           FROM (
               SELECT *
               FROM lineups l
@@ -191,7 +192,7 @@ module.exports = {
       LEFT JOIN clubs c1 ON c1.club_id = sb.home_team_id #and c1.club_id = sb.away_team_id
       LEFT JOIN clubs c2 ON c2.club_id = sb.away_team_id
       LEFT JOIN stadiums s ON s.stadium_id = sb.match_place
-      LEFT JOIN season_by_leagues sbl ON sbl.season_by_league_id = sb.season_by_league_id
+      LEFT JOIN season_by_leagues sbl ON sbl.season_id = sb.season_id
       LEFT JOIN leagues l ON l.league_id = sbl.league_id 
       `;
 
@@ -238,7 +239,7 @@ module.exports = {
           LEFT JOIN teams t1 ON t1.team_id = sb.home_team_id 
           LEFT JOIN teams t2 ON t2.team_id = sb.away_team_id
           LEFT JOIN venues v ON v.venue_id = sb.match_place
-          LEFT JOIN seasons_v2 s ON s.season_id = sb.season_by_league_id
+          LEFT JOIN seasons_v2 s ON s.season_id = sb.season_id
           LEFT JOIN leagues_v2 l ON l.league_id = s.league_id 
       `;
 
@@ -292,7 +293,7 @@ module.exports = {
         LEFT JOIN clubs c1 ON c1.club_id = sb.home_team_id #and c1.club_id = sb.away_team_id
         LEFT JOIN clubs c2 ON c2.club_id = sb.away_team_id
         LEFT JOIN stadiums s ON s.stadium_id = sb.match_place
-        LEFT JOIN season_by_leagues sbl ON sbl.season_by_league_id = sb.season_by_league_id
+        LEFT JOIN season_by_leagues sbl ON sbl.season_id = sb.season_id
         LEFT JOIN leagues l ON l.league_id = sbl.league_id 
         `;
 
@@ -343,7 +344,7 @@ module.exports = {
             LEFT JOIN teams t1 ON t1.team_id = sb.home_team_id 
             LEFT JOIN teams t2 ON t2.team_id = sb.away_team_id
             LEFT JOIN venues v ON v.venue_id = sb.match_place
-            LEFT JOIN seasons_v2 s ON s.season_id = sb.season_by_league_id
+            LEFT JOIN seasons_v2 s ON s.season_id = sb.season_id
             LEFT JOIN leagues_v2 l ON l.league_id = s.league_id 
         `;
 
@@ -369,6 +370,7 @@ module.exports = {
     try {
       const query = `
             SELECT sb.match_id
+                 , sb.season_id
                  , t1.team_id as home_team_id
                  , t1.name as home_team_name
                  , t1.short_code as home_team_nickname
@@ -392,7 +394,7 @@ module.exports = {
             LEFT JOIN teams t1 ON t1.team_id = sb.home_team_id 
             LEFT JOIN teams t2 ON t2.team_id = sb.away_team_id
             LEFT JOIN venues v ON v.venue_id = sb.match_place
-            LEFT JOIN seasons_v2 s ON s.season_id = sb.season_by_league_id
+            LEFT JOIN seasons_v2 s ON s.season_id = sb.season_id
             LEFT JOIN leagues_v2 l ON l.league_id = s.league_id 
         `;
 
@@ -468,8 +470,8 @@ module.exports = {
                       END
                   END AS result	
                 FROM match_v2 m 
-                WHERE (m.home_team_id = ${teamId} OR m.home_team_id = ${opponentId})
-                  AND (m.away_team_id = ${teamId} OR m.away_team_id = ${opponentId})
+                WHERE ( m.home_team_id = ${teamId} OR m.home_team_id = ${opponentId} )
+                  AND ( m.away_team_id = ${teamId} OR m.away_team_id = ${opponentId} )
                   AND m.is_finished = 1
               )sb
               GROUP BY sb.result              
@@ -518,41 +520,58 @@ module.exports = {
     }
   },
 
-  // 주목할만한 선수 조회
-  getTeamPerformance: async ({ teamId, opponentId }) => {
+  // 주목할만한 선수ID 조회
+  // [ 조건 ]
+  // 1. 상대팀과의 경기 기록 기준 골득점이 가장 많은 경우
+  // 2. 주목할만한 선수가 해당 경기 시즌에 속해있어야함
+  getNotablePlayer: async ({ seasonId, teamId, opponentId }) => {
     let connection;
 
     try {
       const query = `
-                SELECT sb.*, count(result) as count
+                SELECT sb.player_id
+                      , sb.name as player_name
+                      , sb.height
+                      , sb.weight
+                      , sb.image_path as player_image
+                      , po1.name AS position
+                      , po1.initial AS position_initial
+                      , sb.goal_count
                 FROM (
-                  SELECT CASE
-                      WHEN m.home_team_id = ${teamId} THEN
-                        CASE
-                          WHEN  m.match_result = 'HOME' THEN 'WIN'
-                          WHEN  m.match_result = 'AWAY' THEN 'LOSE'
-                          ELSE 'DRAW'
-                        END
-                      WHEN m.away_team_id = ${teamId} THEN
-                        CASE
-                          WHEN  m.match_result = 'HOME' THEN 'LOSE'
-                          WHEN  m.match_result = 'AWAY' THEN 'WIN'
-                          ELSE 'DRAW'
-                        END
-                    END AS result	
-                  FROM match_v2 m 
-                  WHERE (m.home_team_id = ${teamId} OR m.home_team_id = ${opponentId})
-                    AND (m.away_team_id = ${teamId} OR m.away_team_id = ${opponentId})
-                    AND m.is_finished = 1
-                )sb
-                GROUP BY sb.result              
-            `;
+                  SELECT p.* 
+                        , IFNULL( p.detailed_position_id, p.position_id ) as join_position_id
+                        , a.goal_count
+                  FROM (
+                        SELECT md.match_detail_id
+                              , md.team_id
+                              , md.player_id
+                              , COUNT(player_id) as goal_count
+                        FROM (
+                            SELECT *
+                            FROM match_v2 m
+                            WHERE 1=1
+                                AND ( m.home_team_id = ${teamId} or m.home_team_id = ${opponentId} )
+                                AND ( m.away_team_id = ${teamId} or m.away_team_id = ${opponentId} )
+                                AND m.is_finished = 1
+                        )sb
+                        INNER JOIN match_details md on md.match_id = sb.match_id
+                        AND md.team_id = ${teamId}
+                        AND md.type = "GOAL"
+                        GROUP BY md.player_id, md.match_detail_id
+                        ORDER BY goal_count , md.match_detail_id DESC                      
+                  ) a
+                  INNER JOIN players p ON p.player_id = a.player_id
+                  INNER JOIN squads s ON s.season_id = ${seasonId}
+                  LIMIT 1
+                ) sb
+                LEFT JOIN positions_v2 po1 ON po1.position_id = sb.join_position_id
+        `;
 
       connection = await db.getConnection();
 
-      const performance = await connection.query(query);
+      const player = await connection.query(query);
 
-      return performance[0];
+      return player[0][0];
     } catch (err) {
       logger.error('getTeamPerformance Model Error : ', err.stack);
       console.error('Error', err.message);

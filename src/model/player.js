@@ -107,77 +107,9 @@ module.exports = {
     }
   },
 
-  // 현재 시즌 선수단 조회
-  getTeamPlayer: async (teamId) => {
-    let connection;
-    try {
-      const query = `
-          SELECT p.player_id, p.player_name, p.image_url, sb.back_number
-                , po1.category, po1.initial as main_position
-          FROM (
-            SELECT *
-            FROM contracts c 
-            WHERE c.club_id = ${teamId}
-              AND c.contract_status = 1
-          ) sb
-          LEFT JOIN persons p ON p.player_id = sb.player_id
-          LEFT JOIN positions po1 ON po1.position_id  = p.position_id1 
-      `;
-      connection = await db.getConnection();
-
-      const player = await connection.query(query);
-
-      return player[0];
-    } catch (err) {
-      logger.error('getMyTeamPlayer Model Error : ', err.stack);
-      console.error('Error', err.message);
-      return err;
-    } finally {
-      if (connection) {
-        await db.releaseConnection(connection);
-      }
-    }
-  },
-
-  // TODO
-  getTeamPlayerV2: async (teamId) => {
-    let connection;
-    try {
-      const query = `
-          SELECT p.player_id
-                , p.player_name
-                , p.image_url as player_image
-                , sb.back_number 
-                , po1.category as position_category
-                , po1.initial as main_position
-          FROM (
-            SELECT *
-            FROM contracts c 
-            WHERE c.club_id = ${teamId}
-              AND c.contract_status = 1
-          ) sb
-          LEFT JOIN persons p ON p.player_id = sb.player_id
-          LEFT JOIN positions po1 ON po1.position_id  = p.position_id1 
-      `;
-      connection = await db.getConnection();
-
-      const player = await connection.query(query);
-
-      return player[0];
-    } catch (err) {
-      logger.error('getMyTeamPlayer Model Error : ', err.stack);
-      console.error('Error', err.message);
-      return err;
-    } finally {
-      if (connection) {
-        await db.releaseConnection(connection);
-      }
-    }
-  },
-
   // 시즌별 선수단 검색
   // [ 조건 ]
-  // 시즌ID가 없는 경우 모든 선수의 가장 최근 시즌 계약 정보가 나와야함
+  // 1. 시즌ID가 없는 경우 모든 선수의 가장 최근 시즌 계약 정보가 나와야함
   getTeamPlayerByLeagueSeasonV2: async ({
     teamId,
     seasonId,
@@ -234,7 +166,4 @@ module.exports = {
       }
     }
   },
-
-  // 주목할 만한 선수
-  getNotablePlayer: async () => {},
 };
