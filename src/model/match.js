@@ -99,6 +99,7 @@ module.exports = {
     try {
       const query = `
           SELECT sb.match_id
+                , sb.season_id
                 , t1.team_id as home_team_id
                 , t1.name as home_team_name
                 , t1.short_code as home_team_nickname
@@ -147,6 +148,7 @@ module.exports = {
     try {
       const query = `
             SELECT sb.match_id
+                 , sb.season_id
                  , t1.team_id as home_team_id
                  , t1.name as home_team_name
                  , t1.short_code as home_team_nickname
@@ -282,7 +284,7 @@ module.exports = {
 
     try {
       const query = `
-              SELECT sb.*, count(result) as count
+              SELECT sb.*, count(result) as count, t.image_path as opponent_image
               FROM (
                 SELECT CASE
                     WHEN m.home_team_id = ${teamId} THEN
@@ -303,7 +305,9 @@ module.exports = {
                   AND ( m.away_team_id = ${teamId} OR m.away_team_id = ${opponentId} )
                   AND m.is_finished = 1
               )sb
-              GROUP BY sb.result              
+              LEFT JOIN teams t ON t.team_id = ${opponentId}  
+              GROUP BY sb.result
+              
           `;
 
       connection = await db.getConnection();
