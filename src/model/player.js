@@ -34,9 +34,10 @@ module.exports = {
                 , sb.date_of_birth as birth_date
                 , sb.height
                 , sb.weight
-                , sb.image_path as player_image
+                , sb.image_path as player_image_url
                 , po1.name AS position
                 , po1.initial AS position_initial
+                , po1.category AS position_category
                 , c1.name AS nationality
           FROM (
             SELECT p.* 
@@ -110,7 +111,7 @@ module.exports = {
             SELECT p.player_id
                   , sb.season_id
                   , p.display_name as player_name
-                  , p.image_path as player_image
+                  , p.image_path as player_image_url
                   , sb.jersey_number
                   , sb.position_id
                   , po1.category as position_category

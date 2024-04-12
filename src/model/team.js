@@ -47,7 +47,7 @@ module.exports = {
         SELECT sb.team_id
             , sb.name as team_name
             , sb.founded
-            , sb.image_path as team_image
+            , sb.image_path as team_image_url
             , sb.short_code
             , v.name as venue_name
         FROM (
