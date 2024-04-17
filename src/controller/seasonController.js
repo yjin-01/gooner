@@ -48,4 +48,18 @@ module.exports = {
       resHandler.FailedResponse(res, err.stack, 500);
     }
   },
+
+  // 리그시즌 리스트 조회
+  getLeagueSeasonByTeamId: async (req, res) => {
+    try {
+      const { teamId } = req.query;
+      const { resultData, code } = await seasonService.getLeagueSeasonByTeamId({
+        teamId,
+      });
+      resHandler.SuccessResponse(res, resultData, 200, code);
+    } catch (err) {
+      console.error(err);
+      resHandler.FailedResponse(res, err.stack, 500);
+    }
+  },
 };

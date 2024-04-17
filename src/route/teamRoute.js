@@ -16,4 +16,7 @@ teamRouter.get(
 
 teamRouter.get('/scheduler-test', updateClubPerformance);
 
+teamRouter.get('/scheduler-test', updateClubPerformance);
+
+
 module.exports = teamRouter;

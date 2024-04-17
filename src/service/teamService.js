@@ -7,7 +7,6 @@ module.exports = {
   // 팀 정보 조회
   getOneTeam: async ({ teamId }) => {
     try {
-
       const team = await teamModel.getOneTeamV2({ teamId });
 
       if (!team) {
@@ -25,6 +24,22 @@ module.exports = {
     } catch (err) {
       logger.error('getOneTeam Service Error : ', err.stack);
       throw err;
+    }
+  },
+  // 클럽 별 총 전적 업데이트
+  updateClubPerformance: async () => {
+    try {
+      const clubList = await teamModel.getClubInfo();
+      const premierLeagueList = await crawler.totalMatchesBySeason();
+      const result = await teamModel.updateClubPerformance(
+        clubList,
+        premierLeagueList,
+      );
+      return result;
+    } catch (err) {
+      console.error(err);
+      logger.error('getClubInfo Service Error : ', err.stack);
+      return null;
     }
   },
   // 클럽 별 총 전적 업데이트

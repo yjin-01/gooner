@@ -103,4 +103,17 @@ module.exports = {
       throw err;
     }
   },
+
+  getLeagueSeasonByTeamId: async ({ teamId }) => {
+    try {
+      const leagueSeasons = await seasonModel.getCurrentLeagueSeasonByTeamId({
+        teamId,
+      });
+      return { resultData: leagueSeasons, code: 'suc02' };
+    } catch (err) {
+      console.error(err);
+      logger.error('getAllSeason Service Error : ', err.stack);
+      return null;
+    }
+  },
 };

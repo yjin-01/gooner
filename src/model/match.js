@@ -54,6 +54,7 @@ module.exports = {
 
   // 라인업 조회
   getMatchLineUp: async ({ matchId }) => {
+
     let connection;
 
     try {
@@ -141,6 +142,55 @@ module.exports = {
     }
   },
 
+  getUpcomingMatchV2: async (teamId) => {
+    let connection;
+
+    try {
+      const query =
+        `
+            SELECT sb.match_id
+                 , t1.team_id as home_team_id
+                 , t1.name as home_team_name
+                 , t1.short_code as home_team_nickname
+                 , t1.image_path as home_team_image
+                 , t2.team_id as away_team_id
+                 , t2.name as away_team_name
+                 , t2.short_code as away_team_nickname
+                 , t2.image_path as away_team_image
+                 , sb.match_date
+                 , v.name as venue_name
+                 , l.image_path as league_image
+            FROM (SELECT *
+                  FROM` +
+        '`match_v2`' +
+        `m 
+            WHERE  (m.home_team_id = ${teamId} OR m.away_team_id = ${teamId})
+              AND m.match_date >= NOW()
+          ORDER BY match_date ASC
+          LIMIT 5
+      ) sb
+      LEFT JOIN teams t1 ON t1.team_id = sb.home_team_id #and c1.club_id = sb.away_team_id
+      LEFT JOIN teams t2 ON t2.team_id = sb.away_team_id
+      LEFT JOIN venues v ON v.venue_id = sb.match_place
+      LEFT JOIN seasons_v2 s ON s.season_id = sb.season_by_league_id
+      LEFT JOIN leagues_v2 l ON l.league_id = s.league_id 
+      `;
+
+      connection = await db.getConnection();
+
+      const matchList = await connection.query(query);
+
+      return matchList[0];
+    } catch (err) {
+      logger.error('getUpcomingMatch Model Error : ', err.stack);
+      console.error('Error', err.message);
+    } finally {
+      if (connection) {
+        await db.releaseConnection(connection);
+      }
+    }
+  },
+
   // 최근 경기 결과 조회
   getRecentlyMatchV2: async ({ teamId, count }) => {
     let connection;
@@ -194,6 +244,7 @@ module.exports = {
     }
   },
 
+
   // 경기 조회
   getMatch: async ({ matchId }) => {
     let connection;
@@ -232,6 +283,7 @@ module.exports = {
       connection = await db.getConnection();
 
       const matchList = await connection.query(query);
+
 
       return matchList[0][0];
     } catch (err) {
@@ -386,4 +438,5 @@ module.exports = {
       }
     }
   },
+
 };

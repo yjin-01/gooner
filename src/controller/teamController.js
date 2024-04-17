@@ -26,4 +26,16 @@ module.exports = {
       resHandler.FailedResponse(res, err.stack, 500);
     }
   },
+
+  // 스케줄러 테스트 용도
+  updateClubPerformance : async (req,res) =>{
+    try {
+
+      const result = await teamService.updateClubPerformance();
+      resHandler.SuccessResponse(res, result, 2001);
+    } catch (err) {
+      console.error(err);
+      resHandler.FailedResponse(res, err.stack, 500);
+    }
+  }
 };
