@@ -91,7 +91,7 @@ module.exports = {
       return { resultData: matchList, code: 'suc01' };
     } catch (err) {
       logger.error('getUpcomingMatch Service Error : ', err.stack);
-      return null;
+      throw err;
     }
   },
 
@@ -152,10 +152,24 @@ module.exports = {
         opponentId,
       });
 
-      // 3. 상대 전적
-      const performance = await matchModel.getTeamPerformance({
+      // 3. 상대팀과의 전적 조회
+      const performance = {
+        opponent_image_url: '',
+        WIN: 0,
+        LOSE: 0,
+        DRAW: 0,
+      };
+
+      const performanceResult = await matchModel.getTeamPerformance({
         teamId,
         opponentId,
+      });
+
+      performanceResult.forEach((el, i) => {
+        if (i === 0) {
+          performance['opponent_image_url'] = el.opponent_image_url;
+        }
+        performance[el.result] = el.count;
       });
 
       const resultData = { lineUp, notablePlayer, performance };
