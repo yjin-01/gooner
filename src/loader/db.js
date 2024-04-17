@@ -5,20 +5,27 @@ const { mysqlConfig } = require('../config/serverConfig');
 const logger = require('../util/logger');
 
 // 커넥션 풀 생성
-const pool = genericPool.createPool({
-  create: async function () {
-    try {
-      const connection = await mysql2.createConnection(mysqlConfig);
-      return connection;
-    } catch (err) {
-      logger.error('Error creating connection:', err.stack);
-      throw err;
-    }
+const pool = genericPool.createPool(
+  {
+    create: async function () {
+      try {
+        const connection = await mysql2.createConnection(mysqlConfig);
+        return connection;
+      } catch (err) {
+        logger.error('Error creating connection:', err.stack);
+        throw err;
+      }
+    },
+    destroy: function (connection) {
+      return connection.end();
+    },
+    log: true,
   },
-  destroy: function (connection) {
-    return connection.end();
+  {
+    max: 20, // 풀 최대 사이즈
+    min: 3, // 풀 최소 사이즈
   },
-});
+);
 
 module.exports = {
   // 문자열 이스케이프
@@ -27,12 +34,21 @@ module.exports = {
   },
   // 풀에서 커넥션 획득
   getConnection: async function () {
-    return await pool.acquire();
+    try {
+      return await pool.acquire();
+    } catch (err) {
+      logger.error('Error getConnection:', err.stack);
+      throw err;
+    }
   },
 
   // 사용이 끝난 커넥션을 풀에 반환
-  releaseConnection: function (connection) {
-    return pool.release(connection);
+  releaseConnection: async function (connection) {
+    return pool.release(connection).catch((err) => {
+      // 풀에서 연결을 반환하는 동안 오류가 발생한 경우 여기서 처리
+      logger.error('Error releasing connection:', err.stack);
+      throw err;
+    });
   },
 
   // 트랜잭션 시작

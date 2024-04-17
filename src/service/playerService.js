@@ -13,48 +13,54 @@ module.exports = {
     }
   },
 
-  getOnePlayer: async (teamId, playerId) => {
+  getOnePlayer: async ({ teamId, playerId }) => {
     try {
-      const player = await playerModel.getOnePlayer(teamId, playerId);
-      return player;
-    } catch (err) {
-      console.log(err);
-      logger.error('getOnePlayer Service Error : ', err.stack);
-      return null;
-    }
-  },
+      // 선수 정보 조회
+      const player = await playerModel.getOnePlayerV2({ playerId });
 
-  getTeamPlayer: async (teamId) => {
-    try {
-      const teamPlayer = await playerModel.getTeamPlayer(teamId);
-      return teamPlayer;
-    } catch (err) {
-      console.log(err);
-      logger.error('getTeamPlayer Service Error : ', err.stack);
-      return null;
-    }
-  },
-
-  getTeamPlayerByLeagueSeason: async (teamId, season) => {
-    try {
-      const leagueStartDate = season.split('-')[0] + '-07-01';
-      const leagueEndDate = season.split('-')[1] + '-06-30';
-
-      const teamPlayer = await playerModel.getTeamPlayerByLeagueSeason(
+      // 선수 최신 등번호 조회
+      const jerseyNumber = await playerModel.getPlayerJerseyNumber({
         teamId,
-        leagueStartDate,
-        leagueEndDate,
-      );
-      return teamPlayer;
+        playerId,
+      });
+
+      // squads 테이블에 정보가 없는 경우
+      if (!jerseyNumber) {
+        player.jersey_number = null;
+      } else {
+        player.jersey_number = jerseyNumber.jersey_number;
+      }
+
+      return { resultData: player, code: 'suc01' };
     } catch (err) {
-      console.log(err);
+      logger.error('getOnePlayer Service Error : ', err.stack);
+      throw err;
+    }
+  },
+
+  getTeamPlayerByLeagueSeason: async ({
+    teamId,
+    seasonId,
+    positionId,
+    keyword,
+  }) => {
+    try {
+      const teamPlayer = await playerModel.getTeamPlayerByLeagueSeasonV2({
+        teamId,
+        seasonId,
+        positionId,
+        keyword,
+      });
+
+      // throw err;
+
+      return { resultData: teamPlayer, code: 'suc01' };
+    } catch (err) {
       logger.error('getTeamPlayerByLeagueSeason Service Error : ', err.stack);
-      return null;
+      throw err;
     }
   },
 
   // 주목할 만한 선수
-  getNotablePlayer : async () =>{
-
-  }
+  getNotablePlayer: async () => {},
 };

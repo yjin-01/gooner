@@ -1,19 +1,24 @@
 const matchModel = require('../model/match');
+const playerModel = require('../model/player');
 const logger = require('../util/logger');
 
 module.exports = {
   // 팀 정보 조회
-  getMatchByTeamAndSeason: async (teamId, seasonId) => {
+  getMatchByTeamAndSeason: async ({ teamId, seasonId }) => {
     try {
-      const matchList = await matchModel.getMatchByTeamAndSeasonV2(
+      const matchList = await matchModel.getMatchByTeamAndSeasonV2({
         teamId,
         seasonId,
-      );
-      return matchList;
+      });
+
+      if (matchList.length === 0) {
+        return { resultData: {}, code: 'err01' };
+      }
+
+      return { resultData: matchList, code: 'suc01' };
     } catch (err) {
-      console.error(err);
       logger.error('getMatchByTeamAndSeason Service Error : ', err.stack);
-      return null;
+      throw err;
     }
   },
 
@@ -75,36 +80,90 @@ module.exports = {
   getTeamLineUp: async () => {},
 
   // 예정 경기 조회
-  getUpcomingMatch: async (teamId) => {
+  getUpcomingMatch: async ({ teamId }) => {
     try {
-      const matchList = await matchModel.getUpcomingMatchV2(teamId);
-      return matchList;
+      const matchList = await matchModel.getUpcomingMatchV2({ teamId });
+
+      if (matchList.length === 0) {
+        return { resultData: {}, code: 'err01' };
+      }
+
+      return { resultData: matchList, code: 'suc01' };
     } catch (err) {
-      console.error(err);
       logger.error('getUpcomingMatch Service Error : ', err.stack);
       return null;
     }
   },
 
   // 가장 최근 경기 결과 조회
-  getRecentlyMatch: async (teamId) => {
+  getRecentlyMatch: async ({ teamId }) => {
     try {
-      const match = await matchModel.getRecentlyMatchV2(teamId, 1);
+      const match = await matchModel.getRecentlyMatchV2({ teamId, count: 1 });
 
       if (match.length === 0) {
-        return {};
+        return { resultData: {}, code: 'err01' };
       }
 
       const matchId = match[0].match_id;
 
       // 경기 상세 조회
-      const matchDetail = await matchModel.getMatchDetailByMatchId(matchId);
+      const matchDetail = await matchModel.getMatchDetailByMatchId({ matchId });
 
-      return { match: match[0], matchDetail };
+      const resultData = { match: match[0], matchDetail };
+
+      return { resultData, code: 'suc01' };
     } catch (err) {
-      console.error(err);
       logger.error('getRecentlyMatch Service Error : ', err.stack);
-      return null;
+      throw err;
+    }
+  },
+
+  // 경기 조회
+  getMatch: async ({ matchId }) => {
+    try {
+      const match = await matchModel.getMatch({ matchId });
+
+      if (!match) {
+        return { resultData: {}, code: 'err01' };
+      }
+
+      // 경기 상세 조회
+      const matchDetail = await matchModel.getMatchDetailByMatchId({ matchId });
+
+      const resultData = { match: match, matchDetail };
+
+      return { resultData, code: 'suc01' };
+    } catch (err) {
+      logger.error('getMatch Service Error : ', err.stack);
+      throw err;
+    }
+  },
+
+  // 경기관련 정보 조회
+  getMatchInformation: async ({ matchId, seasonId, teamId, opponentId }) => {
+    try {
+      // 1. 라인업 조회
+      const lineUp = await matchModel.getMatchLineUp({ matchId });
+
+      // 2. 주목할만한 선수 조회
+      const notablePlayer = await matchModel.getNotablePlayer({
+        seasonId,
+        teamId,
+        opponentId,
+      });
+
+      // 3. 상대 전적
+      const performance = await matchModel.getTeamPerformance({
+        teamId,
+        opponentId,
+      });
+
+      const resultData = { lineUp, notablePlayer, performance };
+
+      return { resultData, code: 'suc01' };
+    } catch (err) {
+      logger.error('getMatchInformation Service Error : ', err.stack);
+      throw err;
     }
   },
 };

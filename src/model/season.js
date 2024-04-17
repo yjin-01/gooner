@@ -43,7 +43,7 @@ module.exports = {
             FROM league_participating_clubs_by_season lpcbs 
             WHERE club_id = ${teamId}
             ) sb
-          LEFT JOIN season_by_leagues sbl on sbl.season_by_league_id  = sb.season_by_league_id
+          LEFT JOIN season_by_leagues sbl on sbl.season_id  = sb.season_id
           GROUP BY sbl.league_season 
       `;
 
@@ -63,7 +63,7 @@ module.exports = {
     }
   },
 
-  getAllSeasonByTeamIdV2: async (teamId) => {
+  getAllSeasonByTeamIdV2: async ({ teamId }) => {
     let connection;
 
     try {
@@ -75,6 +75,7 @@ module.exports = {
               WHERE participant_id = ${teamId}
             ) sb
           LEFT JOIN seasons_v2 s2 on s2.season_id  = sb.season_id
+          ORDER BY s2.season_id ASC
       `;
 
       connection = await db.getConnection();
@@ -85,7 +86,7 @@ module.exports = {
     } catch (err) {
       logger.error('getAllSeasonByTeamId Model Error : ', err.stack);
       console.error('Error', err.message);
-      return err;
+      throw err;
     } finally {
       if (connection) {
         await db.releaseConnection(connection);
@@ -122,9 +123,48 @@ module.exports = {
 
       return season[0];
     } catch (err) {
-      logger.error('getAllSeasonByTeamId Model Error : ', err.stack);
+      logger.error('getCurrentLeagueSeasonByTeamId Model Error : ', err.stack);
       console.error('Error', err.message);
-      return err;
+      throw err;
+    } finally {
+      if (connection) {
+        await db.releaseConnection(connection);
+      }
+    }
+  },
+
+  getSeasonRank: async ({ seasonId }) => {
+    let connection;
+
+    try {
+      const query = `
+          SELECT sb.standing_id
+                , sb.position
+                , sb.points
+                , sb.win
+                , sb.loss
+                , sb.draw
+                , t.team_id
+                , t.name as team_name
+                , t.short_code
+            FROM(
+              SELECT *
+              FROM standing s 
+              WHERE season_id = ${seasonId}
+            ) sb
+          LEFT JOIN teams t on t.team_id = sb.participant_id
+          ORDER BY sb.position ASC
+      `;
+
+      connection = await db.getConnection();
+
+      const rank = await connection.query(query);
+
+      return rank[0];
+    } catch (err) {
+      logger.error('getSeasonRank Model Error : ', err.stack);
+      console.error('Error', err.message);
+      throw err;
     } finally {
       if (connection) {
         await db.releaseConnection(connection);
