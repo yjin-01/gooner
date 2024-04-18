@@ -1,32 +1,33 @@
-const express = require("express");
-const cors = require("cors");
-const prometheus = require("prom-client"); // Prometheus 모듈 추가
-const helmet = require("helmet");
+const express = require('express');
+const cors = require('cors');
+const prometheus = require('prom-client'); // Prometheus 모듈 추가
+const helmet = require('helmet');
 // const schedulerTask = require("./scheduler");
 const WebSocket = require('./chat');
 
+const path = require('path');
+
 // 추가적인 미들웨어 여기에 추가
 function configureMiddleware(app) {
-
   // Prometheus 메트릭 레지스트리 생성
   const register = new prometheus.Registry();
 
-// 기본 메트릭을 레지스트리에 등록
+  // 기본 메트릭을 레지스트리에 등록
   prometheus.collectDefaultMetrics({ register });
 
   const customMetric = new prometheus.Gauge({
-    name : "custom_metric",
-    help : "This is a custom metric",
-    registers : [register],
-  })
+    name: 'custom_metric',
+    help: 'This is a custom metric',
+    registers: [register],
+  });
 
-  app.get("/update-metric", (req,res) =>{
+  app.get('/update-metric', (req, res) => {
     customMetric.set(Math.random() * 100);
 
-    res.send("Metric updated successfully");
-  })
+    res.send('Metric updated successfully');
+  });
 
-// Prometheus 미들웨어를 사용하여 메트릭을 노출
+  // Prometheus 미들웨어를 사용하여 메트릭을 노출
   app.get('/metrics', async (req, res) => {
     try {
       res.set('Content-Type', register.contentType);
@@ -35,16 +36,16 @@ function configureMiddleware(app) {
       res.status(500).end(ex);
     }
   });
+  app.use(express.static(path.join(__dirname, 'public')));
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use(cors());
   app.use(helmet());
-
 }
 
 // 추가적인 라우트 모듈을 여기에 추가
 function configureRoutes(app, route) {
-  app.use("/apis", route);
+  app.use('/apis', route);
 }
 
 function createServerConfig(config, route) {
@@ -75,4 +76,3 @@ module.exports = {
   configureMiddleware,
   configureRoutes,
 };
-
