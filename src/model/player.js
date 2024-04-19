@@ -30,7 +30,7 @@ module.exports = {
     try {
       const query = `
           SELECT sb.player_id
-                , sb.name as player_name
+                , sb.display_name as player_name
                 , sb.date_of_birth as birth_date
                 , sb.height
                 , sb.weight

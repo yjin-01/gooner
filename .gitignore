@@ -5,6 +5,7 @@
 .env.production
 .env.dev
 
+/src/public/gooner_api.yaml
 
 README.md
 

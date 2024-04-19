@@ -75,10 +75,6 @@ module.exports = {
     }
   },
 
-  // 라인업 - 1시간전
-
-  getTeamLineUp: async () => {},
-
   // 예정 경기 조회
   getUpcomingMatch: async ({ teamId }) => {
     try {

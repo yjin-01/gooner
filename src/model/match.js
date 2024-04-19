@@ -22,7 +22,7 @@ module.exports = {
                 , sb.round
                 , sb.is_finished
                 , v.name as venue_name
-                , l.image_path as league_image
+                , l.image_path as league_image_url
             FROM(
                 SELECT *
                 FROM match_v2 m 
@@ -62,7 +62,8 @@ module.exports = {
                 , sb.match_id
                 , sb.player_id
                 , sb.team_id
-                , sb.player_name
+                , pl.display_name as player_name
+                , pl.image_path as player_image_url
                 , sb.jersey_number
                 , sb.formation_field
                 , sb.formation_position
@@ -74,6 +75,7 @@ module.exports = {
               FROM lineups l
               WHERE l.match_id = ${matchId}
           ) sb
+          LEFT JOIN players pl ON pl.player_id = sb.player_id
           LEFT JOIN positions_v2 p ON p.position_id = sb.position_id
       `;
 
@@ -110,7 +112,7 @@ module.exports = {
                 , t2.image_path as away_team_image_url
                 , sb.match_date
                 , v.name as venue_name
-                , l.image_path as league_image
+                , l.image_path as league_image_url
           FROM (
               SELECT *
               FROM match_v2 m 
@@ -164,7 +166,7 @@ module.exports = {
                  , sb.round
                  , sb.is_finished
                  , v.name as venue_name
-                 , l.image_path as league_image
+                 , l.image_path as league_image_url
             FROM (
                 SELECT *
                 FROM match_v2 m 
@@ -217,7 +219,7 @@ module.exports = {
                  , sb.round
                  , sb.is_finished
                  , v.name as venue_name
-                 , l.image_path as league_image
+                 , l.image_path as league_image_url
             FROM (
                 SELECT *
                 FROM match_v2 m 
@@ -252,8 +254,8 @@ module.exports = {
     try {
       const query = `
         SELECT sb.*
-              , p1.name as player_name
-              , p2.name as related_player_name
+              , p1.display_name as player_name
+              , p2.display_name as related_player_name
         FROM (
             SELECT *
             FROM match_details md
@@ -336,7 +338,7 @@ module.exports = {
     try {
       const query = `
                 SELECT sb.player_id
-                      , sb.name as player_name
+                      , sb.display_name as player_name
                       , sb.height
                       , sb.weight
                       , sb.image_path as player_image_url
@@ -360,11 +362,11 @@ module.exports = {
                                 AND ( m.away_team_id = ${teamId} or m.away_team_id = ${opponentId} )
                                 AND m.is_finished = 1
                         )sb
-                        INNER JOIN match_details md on md.match_id = sb.match_id
-                        AND md.team_id = ${teamId}
-                        AND md.type = "GOAL"
-                        GROUP BY md.player_id, md.match_detail_id
-                        ORDER BY goal_count , md.match_detail_id DESC                      
+                  INNER JOIN match_details md on md.match_id = sb.match_id
+                    AND md.team_id = ${teamId}
+                    AND md.type = "GOAL"
+                  GROUP BY md.player_id, md.match_detail_id
+                  ORDER BY goal_count , md.match_detail_id DESC                      
                   ) a
                   INNER JOIN players p ON p.player_id = a.player_id
                   INNER JOIN squads s ON s.season_id = ${seasonId}
