@@ -39,6 +39,7 @@ module.exports = {
                 , po1.initial AS position_initial
                 , po1.category AS position_category
                 , c1.name AS nationality
+                , c1.image_path AS nationality_image_url
           FROM (
             SELECT p.* 
                   , IFNULL( p.detailed_position_id, p.position_id ) as join_position_id

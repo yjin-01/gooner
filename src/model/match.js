@@ -287,7 +287,11 @@ module.exports = {
 
     try {
       const query = `
-              SELECT sb.*, count(result) as count, t.image_path as opponent_image_url
+              SELECT sb.*
+                  , count(result) as count
+                  , t.image_path as opponent_image_url
+                  , t.name as opponent_name
+                  , t.short_code as opponent_short_code
               FROM (
                 SELECT CASE
                     WHEN m.home_team_id = ${teamId} THEN
