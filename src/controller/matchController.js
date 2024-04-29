@@ -59,7 +59,6 @@ module.exports = {
     }
   },
 
-
   // 경기 조회
   getMatch: async (req, res) => {
     try {
@@ -86,6 +85,22 @@ module.exports = {
         seasonId,
         teamId,
         opponentId,
+      });
+
+      resHandler.SuccessResponse(res, resultData, 200, code);
+    } catch (err) {
+      console.error(err);
+      resHandler.FailedResponse(res, err.stack, 500);
+    }
+  },
+
+  // 경기 조회
+  getMatchLineUp: async (req, res) => {
+    try {
+      const { matchId } = req.query;
+      // 경기 결과 조회
+      const { resultData, code } = await matchService.getMatchLineUp({
+        matchId,
       });
 
       resHandler.SuccessResponse(res, resultData, 200, code);

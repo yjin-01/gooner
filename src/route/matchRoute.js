@@ -6,6 +6,7 @@ const {
   checkRelationalPerformance,
   getMatch,
   getMatchInformation,
+  getMatchLineUp,
 } = require('../controller/matchController');
 const { validatorErrorCheck } = require('../middleware/validator');
 const { query, param } = require('express-validator');
@@ -23,6 +24,13 @@ matchRouter.get(
     validatorErrorCheck,
   ],
   getMatchInformation,
+);
+
+// 경기 조회
+matchRouter.get(
+  '/lineup',
+  [query('matchId', 'Bad Request').notEmpty().isNumeric(), validatorErrorCheck],
+  getMatchLineUp,
 );
 
 // 월별 경기 조회
