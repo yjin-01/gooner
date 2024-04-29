@@ -52,6 +52,45 @@ module.exports = {
     }
   },
 
+  // 경기 조회
+  getMatchFormation: async ({ matchId }) => {
+    let connection;
+
+    try {
+      const query = `
+              SELECT sb.match_id
+                   , sb.season_id
+                   , t1.team_id as home_team_id
+                   , sb.home_formation
+                   , t2.team_id as away_team_id
+                   , sb.away_formation
+              FROM (
+                  SELECT *
+                  FROM match_v2 m 
+                  WHERE match_id = ${matchId}
+              ) sb
+              LEFT JOIN teams t1 ON t1.team_id = sb.home_team_id 
+              LEFT JOIN teams t2 ON t2.team_id = sb.away_team_id
+              LEFT JOIN venues v ON v.venue_id = sb.match_place
+              LEFT JOIN seasons_v2 s ON s.season_id = sb.season_id
+              LEFT JOIN leagues_v2 l ON l.league_id = s.league_id 
+          `;
+
+      connection = await db.getConnection();
+
+      const matchList = await connection.query(query);
+
+      return matchList[0][0];
+    } catch (err) {
+      logger.error('getRecentlyMatch Model Error : ', err.stack);
+      console.error('Error', err.message);
+    } finally {
+      if (connection) {
+        await db.releaseConnection(connection);
+      }
+    }
+  },
+
   // 라인업 조회
   getMatchLineUp: async ({ matchId }) => {
     let connection;

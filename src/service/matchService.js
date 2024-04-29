@@ -179,12 +179,39 @@ module.exports = {
   },
 
   // 라인업 조회
-  getMatchLineUp: async ({ matchId, seasonId, teamId, opponentId }) => {
+  getMatchLineUp: async ({ matchId }) => {
     try {
-      // 1. 라인업 조회
+      // 1. 경기 formation 정보 조회
+      const formation = await matchModel.getMatchFormation({ matchId });
+
+      // 2. 라인업 조회
       const lineUp = await matchModel.getMatchLineUp({ matchId });
 
-      const resultData = { lineUp };
+      if (!formation) {
+        return { resultData: {}, code: 'err01' };
+      }
+
+      const home_lineup = {
+        home_team_id: formation.home_team_id,
+        home_formaition: formation.home_formation,
+        players: [],
+      };
+
+      const away_lineup = {
+        away_team_id: formation.away_team_id,
+        away_formaition: formation.away_formation,
+        players: [],
+      };
+
+      lineUp.forEach((el) => {
+        if (el.team_id === home_lineup.home_team_id) {
+          home_lineup.players.push(el);
+        } else if (el.team_id === away_lineup.away_team_id) {
+          away_lineup.players.push(el);
+        }
+      });
+
+      const resultData = { home_lineup, away_lineup };
 
       return { resultData, code: 'suc01' };
     } catch (err) {
