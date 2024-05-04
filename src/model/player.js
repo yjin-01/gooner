@@ -47,7 +47,7 @@ module.exports = {
             WHERE p.player_id = ${playerId}
           ) sb
           LEFT JOIN positions_v2 po1 ON po1.position_id = sb.join_position_id
-          LEFT JOIN country_v2 c1 ON c1.country_id = sb.country_id
+          LEFT JOIN country_v2 c1 ON c1.country_id = sb.nationality_id
       `;
 
       connection = await db.getConnection();
