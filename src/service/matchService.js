@@ -192,21 +192,21 @@ module.exports = {
       }
 
       const home_lineup = {
-        home_team_id: formation.home_team_id,
-        home_formaition: formation.home_formation,
+        team_id: formation.home_team_id,
+        formaition: formation.home_formation,
         players: [],
       };
 
       const away_lineup = {
-        away_team_id: formation.away_team_id,
-        away_formaition: formation.away_formation,
+        team_id: formation.away_team_id,
+        formaition: formation.away_formation,
         players: [],
       };
 
       lineUp.forEach((el) => {
-        if (el.team_id === home_lineup.home_team_id) {
+        if (el.team_id === home_lineup.team_id) {
           home_lineup.players.push(el);
-        } else if (el.team_id === away_lineup.away_team_id) {
+        } else if (el.team_id === away_lineup.team_id) {
           away_lineup.players.push(el);
         }
       });
