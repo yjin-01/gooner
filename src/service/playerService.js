@@ -1,4 +1,5 @@
 const playerModel = require('../model/player');
+const matchModel = require('../model/match');
 const logger = require('../util/logger');
 
 module.exports = {
@@ -38,6 +39,44 @@ module.exports = {
     }
   },
 
+  getMatchs: async ({ teamId, playerId }) => {
+    try {
+      // 1. 선수가 참여한 경기 조회
+      const matchList = await matchModel.getMatchByPlayer({ playerId, teamId });
+
+      const matchIds = matchList.map((el) => el.match_id);
+
+      if (matchIds.length === 0) {
+        return { resultData: [], code: 'suc01' };
+      }
+
+      // 2. 경기별 선수 골득점 기록 조회
+      const goalByPlayer = await matchModel.getGoalByPlayer({
+        playerId,
+        teamId,
+        matchIds,
+      });
+
+      // 3. 경기 정보 조회
+      const matchInfoList = await matchModel.getMatch({ matchIds });
+
+      matchInfoList.forEach((match) => {
+        goalByPlayer.forEach((goal) => {
+          if (match.match_id === goal.match_id) {
+            match.player_goal_count = goal.player_goal_count;
+          } else {
+            match.player_goal_count = 0;
+          }
+        });
+      });
+
+      return { resultData: matchInfoList, code: 'suc01' };
+    } catch (err) {
+      logger.error('getMatchs Service Error : ', err.stack);
+      throw err;
+    }
+  },
+
   getTeamPlayerByLeagueSeason: async ({
     teamId,
     seasonId,
@@ -60,7 +99,4 @@ module.exports = {
       throw err;
     }
   },
-
-  // 주목할 만한 선수
-  getNotablePlayer: async () => {},
 };

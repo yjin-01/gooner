@@ -33,6 +33,26 @@ module.exports = {
     }
   },
 
+  // 선수 상세 조회
+  getMatchs: async (req, res) => {
+    try {
+      const { teamId, playerId } = req.query;
+
+      const { resultData, code } = await playerService.getMatchs({
+        teamId,
+        playerId,
+      });
+
+      if (!resultData)
+        return resHandler.FailedResponse(res, 'Player were not found', 400);
+
+      resHandler.SuccessResponse(res, resultData, 200, code);
+    } catch (err) {
+      console.error(err);
+      resHandler.FailedResponse(res, err.stack, 500);
+    }
+  },
+
   // 시즌별 선수단 조회
   getTeamPlayerByLeagueSeason: async (req, res) => {
     try {

@@ -18,6 +18,16 @@ playerRouter.get(
   playerController.getOnePlayer,
 );
 
+playerRouter.get(
+  '/match',
+  [
+    query('playerId', 'Bad Request').notEmpty().isNumeric(),
+    query('teamId', 'Bad Request').notEmpty().isNumeric(),
+    validatorErrorCheck,
+  ],
+  playerController.getMatchs,
+);
+
 // 시즌별 팀의 선수단 조회
 playerRouter.get(
   '/team/season',
