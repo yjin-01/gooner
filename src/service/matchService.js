@@ -117,16 +117,16 @@ module.exports = {
   // 경기 조회
   getMatch: async ({ matchId }) => {
     try {
-      const match = await matchModel.getMatch({ matchId });
+      const match = await matchModel.getMatch({ matchIds: matchId });
 
-      if (!match) {
+      if (match.length === 0) {
         return { resultData: {}, code: 'err01' };
       }
 
       // 경기 상세 조회
       const matchDetail = await matchModel.getMatchDetailByMatchId({ matchId });
 
-      const resultData = { match: match, matchDetail };
+      const resultData = { match: match[0], matchDetail };
 
       return { resultData, code: 'suc01' };
     } catch (err) {
@@ -138,12 +138,33 @@ module.exports = {
   // 경기관련 정보 조회
   getMatchInformation: async ({ matchId, seasonId, teamId, opponentId }) => {
     try {
-      // 1. 주목할만한 선수 조회
+      // 1. 두팀의 참여 경기 조회
+      const matchList = await matchModel.getMatchList({ teamId, opponentId });
+      const matchIds = matchList.map((el) => {
+        return el.match_id;
+      });
+
+      // 1-1. 주목할만한 선수 조회
       const notablePlayer = await matchModel.getNotablePlayer({
         seasonId,
         teamId,
-        opponentId,
+        matchIds,
       });
+
+      // 1-2. 출장횟수 조회
+      // 선발
+      const { startingCount } = await matchModel.getStartingCount({
+        matchIds,
+        playerId: notablePlayer.player_id,
+      });
+
+      // 교체
+      const { substituteCount } = await matchModel.getSubstituteCount({
+        matchIds,
+        playerId: notablePlayer.player_id,
+      });
+
+      notablePlayer['participation_count'] = startingCount + substituteCount;
 
       // 2. 상대팀과의 전적 조회
       const performance = {

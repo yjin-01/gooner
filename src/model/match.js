@@ -237,7 +237,7 @@ module.exports = {
   },
 
   // 경기 조회
-  getMatch: async ({ matchId }) => {
+  getMatch: async ({ matchIds }) => {
     let connection;
 
     try {
@@ -262,7 +262,7 @@ module.exports = {
             FROM (
                 SELECT *
                 FROM match_v2 m 
-                WHERE match_id = ${matchId}
+                WHERE match_id IN(${matchIds})
             ) sb
             LEFT JOIN teams t1 ON t1.team_id = sb.home_team_id 
             LEFT JOIN teams t2 ON t2.team_id = sb.away_team_id
@@ -275,7 +275,7 @@ module.exports = {
 
       const matchList = await connection.query(query);
 
-      return matchList[0][0];
+      return matchList[0];
     } catch (err) {
       logger.error('getRecentlyMatch Model Error : ', err.stack);
       console.error('Error', err.message);
@@ -375,7 +375,7 @@ module.exports = {
   // [ 조건 ]
   // 1. 상대팀과의 경기 기록 기준 골득점이 가장 많은 경우
   // 2. 주목할만한 선수가 해당 경기 시즌에 속해있어야함
-  getNotablePlayer: async ({ seasonId, teamId, opponentId }) => {
+  getNotablePlayer: async ({ seasonId, teamId, matchIds }) => {
     let connection;
 
     try {
@@ -397,23 +397,17 @@ module.exports = {
                               , md.team_id
                               , md.player_id
                               , COUNT(player_id) as goal_count
-                        FROM (
-                            SELECT *
-                            FROM match_v2 m
-                            WHERE 1=1
-                                AND ( m.home_team_id = ${teamId} or m.home_team_id = ${opponentId} )
-                                AND ( m.away_team_id = ${teamId} or m.away_team_id = ${opponentId} )
-                                AND m.is_finished = 1
-                        )sb
-                  INNER JOIN match_details md on md.match_id = sb.match_id
-                    AND md.team_id = ${teamId}
-                    AND md.type = "GOAL"
-                  GROUP BY md.player_id, md.match_detail_id
-                  ORDER BY goal_count , md.match_detail_id DESC                      
+                        FROM match_details md
+                        WHERE 1 = 1
+                          AND md.match_id IN(${matchIds})
+                          AND md.team_id = ${teamId}
+                          AND md.type = "GOAL"
+                        GROUP BY md.player_id, md.match_detail_id
+                        ORDER BY goal_count , md.match_detail_id DESC
+                        LIMIT 1                      
                   ) a
                   INNER JOIN players p ON p.player_id = a.player_id
                   INNER JOIN squads s ON s.season_id = ${seasonId}
-                  LIMIT 1
                 ) sb
                 LEFT JOIN positions_v2 po1 ON po1.position_id = sb.join_position_id
         `;
@@ -424,7 +418,180 @@ module.exports = {
 
       return player[0][0];
     } catch (err) {
-      logger.error('getTeamPerformance Model Error : ', err.stack);
+      logger.error('getNotablePlayer Model Error : ', err.stack);
+      console.error('Error', err.message);
+    } finally {
+      if (connection) {
+        await db.releaseConnection(connection);
+      }
+    }
+  },
+
+  // 선발 횟수
+  getStartingCount: async ({ matchIds, playerId }) => {
+    let connection;
+
+    try {
+      const query = `
+                SELECT COUNT(*) as startingCount
+                FROM lineups l
+                WHERE 1 = 1
+                  AND match_id IN(${matchIds})
+                  AND player_id = ${playerId}
+                  AND type_id = 11
+        `;
+
+      connection = await db.getConnection();
+
+      const startingCount = await connection.query(query);
+
+      return startingCount[0][0];
+    } catch (err) {
+      logger.error('getParticipation Model Error : ', err.stack);
+      console.error('Error', err.message);
+    } finally {
+      if (connection) {
+        await db.releaseConnection(connection);
+      }
+    }
+  },
+
+  // 교체 횟수
+  getSubstituteCount: async ({ matchIds, playerId }) => {
+    let connection;
+
+    try {
+      const query = `
+                SELECT COUNT(*) as substituteCount
+                FROM match_details md
+                WHERE 1 = 1
+                  AND match_id IN(${matchIds})
+                  AND player_id = ${playerId}
+                  AND type = "SUBSTITUTION"
+        `;
+
+      connection = await db.getConnection();
+
+      const substituteCount = await connection.query(query);
+
+      return substituteCount[0][0];
+    } catch (err) {
+      logger.error('getParticipation Model Error : ', err.stack);
+      console.error('Error', err.message);
+    } finally {
+      if (connection) {
+        await db.releaseConnection(connection);
+      }
+    }
+  },
+
+  // 2팀이 진행한 경기 조회
+  getMatchList: async ({ teamId, opponentId }) => {
+    let connection;
+
+    try {
+      const query = `
+              SELECT *
+              FROM match_v2 m
+              WHERE 1=1
+                  AND ( m.home_team_id = ${teamId} or m.home_team_id = ${opponentId} )
+                  AND ( m.away_team_id = ${teamId} or m.away_team_id = ${opponentId} )
+                  AND m.is_finished = 1
+          `;
+
+      connection = await db.getConnection();
+
+      const matchList = await connection.query(query);
+
+      return matchList[0];
+    } catch (err) {
+      logger.error('getMatchList Model Error : ', err.stack);
+      console.error('Error', err.message);
+    } finally {
+      if (connection) {
+        await db.releaseConnection(connection);
+      }
+    }
+  },
+
+  // 선수가 참여한 경기 조회(선발 및 후보 포함)
+  getMatchByPlayer: async ({ playerId, teamId }) => {
+    let connection;
+
+    try {
+      const query = `
+                  SELECT match_id
+                  FROM lineups l
+                  WHERE 1 = 1
+                    AND player_id = ${playerId}
+                    AND team_id = ${teamId}
+                `;
+
+      connection = await db.getConnection();
+
+      const matchList = await connection.query(query);
+
+      return matchList[0];
+    } catch (err) {
+      logger.error('getMatchByPlayer Model Error : ', err.stack);
+      console.error('Error', err.message);
+    } finally {
+      if (connection) {
+        await db.releaseConnection(connection);
+      }
+    }
+  },
+
+  // 선수의 경기 참여 상세 기록
+  getMatchDetailByPlayer: async ({ playerId }) => {
+    let connection;
+
+    try {
+      const query = `
+                SELECT *
+                FROM match_details md
+                WHERE 1 = 1
+                  AND (related_player_id = ${playerId} OR player_id = ${playerId})
+                  AND type = "SUBSTITUTION"
+            `;
+
+      connection = await db.getConnection();
+
+      const matchList = await connection.query(query);
+
+      return matchList[0];
+    } catch (err) {
+      logger.error('getMatchList Model Error : ', err.stack);
+      console.error('Error', err.message);
+    } finally {
+      if (connection) {
+        await db.releaseConnection(connection);
+      }
+    }
+  },
+  // 선수가 참여한 경기의 골득점 수
+  getGoalByPlayer: async ({ playerId, teamId, matchIds }) => {
+    let connection;
+
+    try {
+      const query = `
+                    SELECT md.match_id, count(type) AS player_goal_count
+                    FROM match_details md
+                    WHERE 1 = 1
+                      AND md.player_id = ${playerId}
+                      AND md.team_id = ${teamId}
+                      AND md.match_id IN(${matchIds})
+                      AND md.type = "GOAL"
+                    GROUP BY md.match_id
+                  `;
+
+      connection = await db.getConnection();
+
+      const matchList = await connection.query(query);
+
+      return matchList[0];
+    } catch (err) {
+      logger.error('getMatchByPlayer Model Error : ', err.stack);
       console.error('Error', err.message);
     } finally {
       if (connection) {
