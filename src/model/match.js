@@ -12,9 +12,11 @@ module.exports = {
                 , sb.season_id
                 , t1.team_id as home_team_id
                 , t1.name as home_team_name
+                , t1.short_code as home_team_nickname
                 , t1.image_path as home_team_image_url
                 , t2.team_id as away_team_id
                 , t2.name as away_team_name
+                , t2.short_code as away_team_nickname
                 , t2.image_path as away_team_image_url
                 , sb.match_date
                 , sb.home_score
