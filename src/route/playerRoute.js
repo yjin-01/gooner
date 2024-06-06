@@ -38,6 +38,8 @@ playerRouter.get(
       .if(query('positionId').exists())
       .isNumeric(),
     query('keyword', 'Bad Request').if(query('keyword').exists()).isString(),
+    query('page', 'Bad Request').if(query('page').exists()).isNumeric(),
+    query('size', 'Bad Request').if(query('size').exists()).isNumeric(),
     validatorErrorCheck,
   ],
   playerController.getTeamPlayerByLeagueSeason,

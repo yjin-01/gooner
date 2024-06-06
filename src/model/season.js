@@ -87,6 +87,7 @@ module.exports = {
                 , sb.goal_difference
                 , t.team_id
                 , t.name as team_name
+                , t.image_path as team_image_url
                 , t.short_code
             FROM(
               SELECT *

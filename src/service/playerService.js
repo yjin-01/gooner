@@ -82,18 +82,26 @@ module.exports = {
     seasonId,
     positionId,
     keyword,
+    page,
+    size,
   }) => {
     try {
-      const teamPlayer = await playerModel.getTeamPlayerByLeagueSeasonV2({
-        teamId,
-        seasonId,
-        positionId,
-        keyword,
-      });
+      const { teamPlayer, currentPage, itemsPerPage } =
+        await playerModel.getTeamPlayerByLeagueSeasonV2({
+          teamId,
+          seasonId,
+          positionId,
+          keyword,
+          page,
+          size,
+        });
 
       // throw err;
 
-      return { resultData: teamPlayer, code: 'suc01' };
+      return {
+        resultData: { teamPlayer, page: currentPage, size: itemsPerPage },
+        code: 'suc01',
+      };
     } catch (err) {
       logger.error('getTeamPlayerByLeagueSeason Service Error : ', err.stack);
       throw err;

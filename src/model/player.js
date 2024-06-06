@@ -104,9 +104,15 @@ module.exports = {
     seasonId,
     positionId,
     keyword,
+    page,
+    size,
   }) => {
-    let connection;
+    const itemsPerPage = size || 30; // 페이지당 아이템 수
+    const currentPage = page || 1; // 현재 페이지
 
+    const skip = (currentPage - 1) * itemsPerPage;
+
+    let connection;
     try {
       const query = `
             SELECT p.player_id
@@ -138,14 +144,16 @@ module.exports = {
             LEFT JOIN positions_v2 po1 ON po1.position_id = sb.position_id
             WHERE 1 = 1
               ${positionId ? `AND p.position_id = ${positionId}` : ''}
-              ${keyword ? `AND p.name LIKE "%${keyword}%"` : ''}       
+              ${keyword ? `AND p.name LIKE "%${keyword}%"` : ''}
+            LIMIT ${itemsPerPage} OFFSET ${skip};
+                   
       `;
 
       connection = await db.getConnection();
 
       const players = await connection.query(query);
 
-      return players[0];
+      return { teamPlayer: players[0], currentPage, itemsPerPage };
     } catch (err) {
       logger.error('getTeamPlayerByLeagueSeason Model Error : ', err.stack);
       console.error('Error', err.message);
