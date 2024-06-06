@@ -56,7 +56,7 @@ module.exports = {
   // 시즌별 선수단 조회
   getTeamPlayerByLeagueSeason: async (req, res) => {
     try {
-      const { teamId, seasonId, positionId, keyword } = req.query;
+      const { teamId, seasonId, positionId, keyword, page, size } = req.query;
 
       // 시즌 기간에 해당하는 계약된 선수 조회
       const { resultData, code } =
@@ -65,6 +65,8 @@ module.exports = {
           seasonId,
           positionId,
           keyword,
+          page,
+          size,
         });
 
       resHandler.SuccessResponse(res, resultData, 200, code);
