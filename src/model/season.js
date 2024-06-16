@@ -113,4 +113,34 @@ module.exports = {
       }
     }
   },
+
+  // 선수의 시즌 조회
+  getLeagueSeasonByPlayerId: async ({ teamId, playerId }) => {
+    let connection;
+
+    try {
+      const query = `
+          SELECT s2.season_id, s2.name as season
+          FROM  squads s
+          LEFT JOIN seasons_v2 s2 on s2.season_id = s.season_id 
+          WHERE 1 = 1
+          AND s.player_id = ${playerId}
+          AND s.team_id = ${teamId}
+      `;
+
+      connection = await db.getConnection();
+
+      const season = await connection.query(query);
+
+      return season[0];
+    } catch (err) {
+      logger.error('getLeagueSeasonByPlayerId Model Error : ', err.stack);
+      console.error('Error', err.message);
+      throw err;
+    } finally {
+      if (connection) {
+        await db.releaseConnection(connection);
+      }
+    }
+  },
 };
