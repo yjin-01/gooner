@@ -104,10 +104,11 @@ module.exports = {
     }
   },
 
-  getLeagueSeasonByTeamId: async ({ teamId }) => {
+  getLeagueSeasonByPlayerId: async ({ teamId, playerId }) => {
     try {
-      const leagueSeasons = await seasonModel.getCurrentLeagueSeasonByTeamId({
+      const leagueSeasons = await seasonModel.getLeagueSeasonByPlayerId({
         teamId,
+        playerId,
       });
       return { resultData: leagueSeasons, code: 'suc02' };
     } catch (err) {

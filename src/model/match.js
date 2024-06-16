@@ -517,7 +517,7 @@ module.exports = {
   },
 
   // 선수가 참여한 경기 조회(선발 및 후보 포함)
-  getMatchByPlayer: async ({ playerId, teamId }) => {
+  getMatchByPlayer: async ({ playerId, teamId, matchIds }) => {
     let connection;
 
     try {
@@ -527,6 +527,7 @@ module.exports = {
                   WHERE 1 = 1
                     AND player_id = ${playerId}
                     AND team_id = ${teamId}
+                    ${matchIds.length > 0 ? `AND match_id IN(${matchIds})` : ''}
                 `;
 
       connection = await db.getConnection();
@@ -577,7 +578,7 @@ module.exports = {
 
     try {
       const query = `
-                    SELECT md.match_id, count(type) AS player_goal_count
+                    SELECT md.match_id, count(*) AS player_goal_count
                     FROM match_details md
                     WHERE 1 = 1
                       AND md.player_id = ${playerId}
@@ -594,6 +595,68 @@ module.exports = {
       return matchList[0];
     } catch (err) {
       logger.error('getMatchByPlayer Model Error : ', err.stack);
+      console.error('Error', err.message);
+    } finally {
+      if (connection) {
+        await db.releaseConnection(connection);
+      }
+    }
+  },
+
+  // 선수가 참여한 경기의 옐로카드 수
+  getYellowCardlByPlayer: async ({ playerId, teamId, matchIds }) => {
+    let connection;
+
+    try {
+      const query = `
+                      SELECT md.match_id, count(*) AS player_yellowcard_count
+                      FROM match_details md
+                      WHERE 1 = 1
+                        AND md.player_id = ${playerId}
+                        AND md.team_id = ${teamId}
+                        AND md.match_id IN(${matchIds})
+                        AND md.type = "YELLOWCARD"
+                      GROUP BY md.match_id
+                    `;
+
+      connection = await db.getConnection();
+
+      const matchList = await connection.query(query);
+
+      return matchList[0];
+    } catch (err) {
+      logger.error('getYellowCardlByPlayer Model Error : ', err.stack);
+      console.error('Error', err.message);
+    } finally {
+      if (connection) {
+        await db.releaseConnection(connection);
+      }
+    }
+  },
+
+  // 선수가 참여한 경기의 옐로카드 수
+  getRedCardlByPlayer: async ({ playerId, teamId, matchIds }) => {
+    let connection;
+
+    try {
+      const query = `
+                      SELECT md.match_id, count(*) AS player_redcard_count
+                      FROM match_details md
+                      WHERE 1 = 1
+                        AND md.player_id = ${playerId}
+                        AND md.team_id = ${teamId}
+                        AND md.match_id IN(${matchIds})
+                        AND md.type = "REDCARD"
+                      GROUP BY md.match_id
+                    `;
+
+      connection = await db.getConnection();
+
+      const matchList = await connection.query(query);
+
+      return matchList[0];
+    } catch (err) {
+      logger.error('getRedCardlByPlayer Model Error : ', err.stack);
       console.error('Error', err.message);
     } finally {
       if (connection) {

@@ -3,10 +3,10 @@ const {
   getAllSeason,
   getLeagueSeasonByTeamId,
   getSeasonRank,
+  getLeagueSeasonByPlayerId,
 } = require('../controller/seasonController');
 const { validatorErrorCheck } = require('../middleware/validator');
 const { query } = require('express-validator');
-
 
 const seasonRouter = Router();
 
@@ -35,7 +35,15 @@ seasonRouter.get(
   getSeasonRank,
 );
 
-// 리그시즌 리스트 조회
-seasonRouter.get('/league', getLeagueSeasonByTeamId);
+// 시즌 리스트 조회
+seasonRouter.get(
+  '/player/list',
+  [
+    query('teamId', 'Bad Request').notEmpty().isNumeric(),
+    query('playerId', 'Bad Request').notEmpty().isNumeric(),
+    validatorErrorCheck,
+  ],
+  getLeagueSeasonByPlayerId,
+);
 
 module.exports = seasonRouter;

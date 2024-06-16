@@ -18,6 +18,7 @@ playerRouter.get(
   playerController.getOnePlayer,
 );
 
+// 선수의 경기 조회
 playerRouter.get(
   '/match',
   [
@@ -26,6 +27,18 @@ playerRouter.get(
     validatorErrorCheck,
   ],
   playerController.getMatchs,
+);
+
+// 선수의 시즌 성적 조회
+playerRouter.get(
+  '/match/season',
+  [
+    query('playerId', 'Bad Request').notEmpty().isNumeric(),
+    query('teamId', 'Bad Request').notEmpty().isNumeric(),
+    query('seasonId', 'Bad Request').isNumeric(),
+    validatorErrorCheck,
+  ],
+  playerController.getMatchByseason,
 );
 
 // 시즌별 팀의 선수단 조회
