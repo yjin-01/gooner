@@ -18,6 +18,8 @@ module.exports = {
             , p.display_name as captain_player_name
             , v.name as venue_name
             , c.name as city_name
+            , c2.image_path as nationality_image_url
+            , c2.name as nationality
             , sb.official_web_url
             , sb.sns_facebook
             , sb.sns_x
@@ -30,6 +32,7 @@ module.exports = {
         LEFT JOIN venues v ON v.venue_id = sb.venue_id
         LEFT JOIN players p ON p.player_id = sb.captain_player_id
         LEFT JOIN city_v2 c ON c.city_id = v.city_id
+        LEFT JOIN country_v2 c2 ON c2.country_id = sb.country_id
     `;
 
       connection = await db.getConnection();
